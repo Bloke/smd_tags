@@ -3849,10 +3849,13 @@ function smd_related_tags($atts, $thing='') {
 
 	switch ($type) {
 		case "article":
-			$rs = getRows("SELECT ".$sqlStubs[$type]["select"]." FROM ".safe_pfx($sqlStubs[$type]["table"])." AS txp
+			$rs = getRows("SELECT SQL_CALC_FOUND_ROWS ".$sqlStubs[$type]["select"]." FROM ".safe_pfx($sqlStubs[$type]["table"])." AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'article'" . $statSQL . $excludeClause . $sectionClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
+			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentCount = $contentResult['found'];
+
 			if ($rs) {
 				trace_add('[smd_related_tags article records: ' . print_r($rs, true) . ']');
 				$uniqrs = array();
@@ -3866,16 +3869,18 @@ function smd_related_tags($atts, $thing='') {
 						$thisarticle = $safe;
 					}
 				}
-				$contentCount = count($uniqrs);
 			}
 			break;
 		case "image":
 			$rs = getRows("
-				SELECT txp.id, txp.name, txp.category, txp.ext, txp.w, txp.h, txp.alt, txp.caption, txp.date, txp.author, txp.thumb_w, txp.thumb_h, txp.thumbnail, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
+				SELECT SQL_CALC_FOUND_ROWS txp.id, txp.name, txp.category, txp.ext, txp.w, txp.h, txp.alt, txp.caption, txp.date, txp.author, txp.thumb_w, txp.thumb_h, txp.thumbnail, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
 				FROM ".safe_pfx('txp_image')." AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'image'" . $excludeClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
+			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentCount = $contentResult['found'];
+
 			if ($rs) {
 				trace_add('[smd_related_tags image records: ' . print_r($rs, true) . ']');
 				$uniqrs = array();
@@ -3888,16 +3893,18 @@ function smd_related_tags($atts, $thing='') {
 						$thisimage = $safe;
 					}
 				}
-				$contentCount = count($uniqrs);
 			}
 			break;
 		case "file":
 			$rs = getRows("
-				SELECT txp.id, txp.filename, txp.title, txp.category, txp.permissions, txp.description, txp.downloads, txp.status, txp.modified, txp.created, txp.size, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
+				SELECT SQL_CALC_FOUND_ROWS txp.id, txp.filename, txp.title, txp.category, txp.permissions, txp.description, txp.downloads, txp.status, txp.modified, txp.created, txp.size, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
 				FROM ".safe_pfx('txp_file')." AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'file'" . $statSQL . $excludeClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
+			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentCount = $contentResult['found'];
+
 			if ($rs) {
 				trace_add('[smd_related_tags file records: ' . print_r($rs, true) . ']');
 				$uniqrs = array();
@@ -3910,16 +3917,18 @@ function smd_related_tags($atts, $thing='') {
 						$thisfile = $safe;
 					}
 				}
-				$contentCount = count($uniqrs);
 			}
 			break;
 		case "link":
 			$rs = getRows("
-				SELECT txp.id, txp.date, txp.category, txp.url, txp.linkname, txp.linksort, txp.description, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
+				SELECT SQL_CALC_FOUND_ROWS txp.id, txp.date, txp.category, txp.url, txp.linkname, txp.linksort, txp.description, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
 				FROM ".safe_pfx('txp_link')." AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'link'" . $excludeClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
+			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentCount = $contentResult['found'];
+
 			if ($rs) {
 				trace_add('[smd_related_tags link records: ' . print_r($rs, true) . ']');
 				$uniqrs = array();
@@ -3939,7 +3948,6 @@ function smd_related_tags($atts, $thing='') {
 						$thislink = $safe;
 					}
 				}
-				$contentCount = count($uniqrs);
 			}
 			break;
 	}
