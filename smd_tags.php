@@ -3573,7 +3573,7 @@ function smd_tag_name($atts, $thing='') {
 // Return # of items associated with this tag
 //TODO: think about per-section / per-category counts
 function smd_tag_count($atts, $thing='') {
-	global $smd_thistag;
+	global $smd_thistag, $smd_tags;
 
 	if (!smd_tags_table_exist()) {
 		trigger_error(gTxt('smd_tag_not_available'));
@@ -3595,7 +3595,12 @@ function smd_tag_count($atts, $thing='') {
 		$wrapcount[1] = $wrapcount[0];
 	}
 
-	$out = $smd_thistag['tag_count'];
+	if ($smd_thistag) {
+		$out = $smd_thistag['tag_count'];
+	} else {
+		$out = isset($smd_tags['meta']['content_count']) ? $smd_tags['meta']['content_count'] : '';
+	}
+
 	$out = ($out == 0 && !$showempty) ? '' : $wrapcount[0].$out.$wrapcount[1];
 
 	return doTag($out, $wraptag, $class, $style);
@@ -3646,9 +3651,9 @@ function smd_related_tags($atts, $thing='') {
 		'type'       => '',
 		'section'    => $pretext['s'],
 		'status'     => '4',
-		'limit'	    => 99999,
-		'offset'	    => 0,
-		'form'	    => '',
+		'limit'      => 99999,
+		'offset'     => 0,
+		'form'       => '',
 		'match'      => 'tag_name',
 		'match_self' => 0,
 		'no_widow'   => @$prefs['title_no_widow'],
@@ -3840,6 +3845,7 @@ function smd_related_tags($atts, $thing='') {
 	$last_tag = (isset($smd_tags['meta']['tag_tail'])) ? $smd_tags['meta']['tag_tail'] : '';
 	$matchClause = " AND " .(($matches) ? ($combi ? "smt.name IN (" .join(",", quote_list($matches)). ")" : "smt.name = '".$last_tag."'") : "smt.name = ''");
 	$orderBy = " ORDER BY " .$sort. " LIMIT " .$offset. "," .$limit;
+	$contentCount = 0;
 
 	switch ($type) {
 		case "article":
@@ -3860,6 +3866,7 @@ function smd_related_tags($atts, $thing='') {
 						$thisarticle = $safe;
 					}
 				}
+				$contentCount = count($uniqrs);
 			}
 			break;
 		case "image":
@@ -3881,6 +3888,7 @@ function smd_related_tags($atts, $thing='') {
 						$thisimage = $safe;
 					}
 				}
+				$contentCount = count($uniqrs);
 			}
 			break;
 		case "file":
@@ -3902,6 +3910,7 @@ function smd_related_tags($atts, $thing='') {
 						$thisfile = $safe;
 					}
 				}
+				$contentCount = count($uniqrs);
 			}
 			break;
 		case "link":
@@ -3930,9 +3939,12 @@ function smd_related_tags($atts, $thing='') {
 						$thislink = $safe;
 					}
 				}
+				$contentCount = count($uniqrs);
 			}
 			break;
 	}
+
+	$smd_tags['meta']['content_count'] = $contentCount;
 
 	if ($out) {
 		return doLabel($label, $labeltag).doWrap($out, $wraptag, $break, $class);
@@ -4623,6 +4635,8 @@ Display the number of articles, files, images or links that use the current tag.
 : If you don't like the default separator for the @wrapcount@ attribute, change it.
 : Default: @:@ (colon)
 
+You may also uses this tag to return the _total_ number of pieces of content that match after using smd_related_tags. Any time immediately after encountering @<txp:smd_related_tags>@, you can use this tag to fetch the total number of articles, images, files or links that matched the given tag(s). Respects and/or matches.
+
 h3. Example: display tags/counts from the current article
 
 Here's an example, using the last three tags. In your default article form, add this to show a list of clickable tags associated with the current article:
@@ -4882,7 +4896,7 @@ Beta:
 
 Official:
 
-* 04 Oct 2014 | 0.51 | Removed hold-shift-for-advanced-options; added Textpack; prefs page styling
+* 09 Oct 2014 | 0.51 | Removed hold-shift-for-advanced-options; added Textpack; fixed prefs page styling; added total tag counts (thanks jakob)
 * 25 Apr 2013 | 0.50 | For Txp 4.5.x; improved performance (again) via cacheing; rewrote URL handler; added tag descriptions; enabled AND/OR multi-tag searches; added master tag support; added import from Txp cat / custom field (thanks josh); permitted bi-directional tag tree searching; permitted nested smd_tag_list tags (thanks sacripant); permitted tag parents assigned to categories to be removed from lists (thanks pieman); added smd_tag_list flavours @crumb@, @head@ and @tail@; added @is@ test to smd_if_tag; smd_related_tags: added DB columns from recent Txp releases; fixed information_schema warning on new installs (thanks jayrope); fixed missing tag lists if no categories defined; fixed bogus URLs in subdir installs in smd_tag_name (thanks sacripant / jpdupont); fixed SQL error when deleting non-orphan tags (thanks tye); fixed if_tag_list context trigger with empty URL params; fixed smd_tag_list on empty list and non-list pages; made smd_tag_name play with gbp_permanent_links; fixed smd_related_tags in showall context; swapped @&nbsp;@ for @&#160;@
 * 05 Feb 2011 | 0.40 | Added live search and multi-edit functions; improved performance; added tag import from tru_tags and rss_unlimited_categories; enabled delimited tag entry; fixed rogue slashes in cat lists; fixed URL handler and smd_tag_name to support per-section tag lists, clean URL syntax, and enabled multiple trigger words (all thanks jakob); PHP 5.3 compatibility fix (thanks birdhouse); fixed warnings in smd_related_tags; fixed tag list when no linked cats selected and when category changed; added 'list' and 'group' tag display options; added @sort@, @showall@ and @flavour@ to smd_tag_list for tree and tag cloud support; added @lettername@, @lettertitle@ and @weight@ items to smd_tag_info for building alphabetic tag groups and clouds; changed table collation to utf8_general_ci and improved unicode support; fixed bug in smd_if_tag (again!) when using non-eq tests; added @style@ to smd_tag_name and smd_tag_count
 # --- END PLUGIN HELP ---
