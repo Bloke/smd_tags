@@ -3720,25 +3720,25 @@ function smd_related_tags($atts, $thing='') {
 	// Lookup table for making SQL queries
 	$sqlStubs = array(
 		"article" => array(
-			"select" => "*,unix_timestamp(Posted) as uPosted, unix_timestamp(LastMod) as uLastMod, unix_timestamp(Expires) as uExpires",
+			"select" => "*,unix_timestamp(Posted) as uPosted, unix_timestamp(LastMod) as uLastMod, unix_timestamp(Expires) as uExpires, COUNT(smt.name) as tag_sum",
 			"table" => "textpattern",
 			"gtags" => $thisarticle,
 			"gid" => "thisid",
 		),
 		"image" => array(
-			"select" => "*",
+			"select" => "*, COUNT(smt.name) as tag_sum",
 			"table" => "txp_image",
 			"gtags" => $thisimage,
 			"gid" => "id",
 		),
 		"file" => array(
-			"select" => "*",
+			"select" => "*, COUNT(smt.name) as tag_sum",
 			"table" => "txp_file",
 			"gtags" => $thisfile,
 			"gid" => "id",
 		),
 		"link" => array(
-			"select" => "*",
+			"select" => "*, COUNT(smt.name) as tag_sum",
 			"table" => "txp_link",
 			"gtags" => $thislink,
 			"gid" => "id",
@@ -4723,7 +4723,7 @@ Rudimentary conditional to check a tag for certain parameters and execute the co
 ; %(atnm)parent%
 : Checks if the tag parent matches the one given
 ; %(atnm)count%
-: Checks if the tag count matches the number give
+: Checks if the tag count matches the number given
 ; %(atnm)children%
 : Checks if the number of children the tag has matches the number given
 ; %(atnm)level%
@@ -4894,6 +4894,12 @@ h2(author). Author
 
 h2(#changelog). Changelog
 
+Official:
+
+* 04 Jun 2015 | 0.51 | Removed hold-shift-for-advanced-options; added Textpack; fixed prefs page styling; added total tag counts and sums (thanks jakob/bojay)
+* 25 Apr 2013 | 0.50 | For Txp 4.5.x; improved performance (again) via cacheing; rewrote URL handler; added tag descriptions; enabled AND/OR multi-tag searches; added master tag support; added import from Txp cat / custom field (thanks josh); permitted bi-directional tag tree searching; permitted nested smd_tag_list tags (thanks sacripant); permitted tag parents assigned to categories to be removed from lists (thanks pieman); added smd_tag_list flavours @crumb@, @head@ and @tail@; added @is@ test to smd_if_tag; smd_related_tags: added DB columns from recent Txp releases; fixed information_schema warning on new installs (thanks jayrope); fixed missing tag lists if no categories defined; fixed bogus URLs in subdir installs in smd_tag_name (thanks sacripant / jpdupont); fixed SQL error when deleting non-orphan tags (thanks tye); fixed if_tag_list context trigger with empty URL params; fixed smd_tag_list on empty list and non-list pages; made smd_tag_name play with gbp_permanent_links; fixed smd_related_tags in showall context; swapped @&nbsp;@ for @&#160;@
+* 05 Feb 2011 | 0.40 | Added live search and multi-edit functions; improved performance; added tag import from tru_tags and rss_unlimited_categories; enabled delimited tag entry; fixed rogue slashes in cat lists; fixed URL handler and smd_tag_name to support per-section tag lists, clean URL syntax, and enabled multiple trigger words (all thanks jakob); PHP 5.3 compatibility fix (thanks birdhouse); fixed warnings in smd_related_tags; fixed tag list when no linked cats selected and when category changed; added 'list' and 'group' tag display options; added @sort@, @showall@ and @flavour@ to smd_tag_list for tree and tag cloud support; added @lettername@, @lettertitle@ and @weight@ items to smd_tag_info for building alphabetic tag groups and clouds; changed table collation to utf8_general_ci and improved unicode support; fixed bug in smd_if_tag (again!) when using non-eq tests; added @style@ to smd_tag_name and smd_tag_count
+
 Beta:
 
 * 13 Apr 2010 | 0.31 | Fixed admin side bugs when privs less than Managing Editor; fixed slow response when saving tags; fixed tag category list when no cat(s) selected; warning messages now blink; tidied Tag Manager layout; fixed parent / sublevel handling in smd_tag_list and allowed greater control over level output (thanks woof); added @pad_str@ and @pad_pos@ to smd_tag_name; fixed smd_if_tag so it compares empty strings correctly (thanks johnstephens)
@@ -4902,11 +4908,6 @@ Beta:
 * 16 Oct 2008 | 0.11 | Improved help examples surrounding the autocomplete plugin (thanks thebombsite); fixed remove_tables, use of PFX and added debug to installation procedure (thanks jpdupont)
 * 15 Oct 2008 | 0.10 | Initial release
 
-Official:
-
-* 09 Oct 2014 | 0.51 | Removed hold-shift-for-advanced-options; added Textpack; fixed prefs page styling; added total tag counts (thanks jakob)
-* 25 Apr 2013 | 0.50 | For Txp 4.5.x; improved performance (again) via cacheing; rewrote URL handler; added tag descriptions; enabled AND/OR multi-tag searches; added master tag support; added import from Txp cat / custom field (thanks josh); permitted bi-directional tag tree searching; permitted nested smd_tag_list tags (thanks sacripant); permitted tag parents assigned to categories to be removed from lists (thanks pieman); added smd_tag_list flavours @crumb@, @head@ and @tail@; added @is@ test to smd_if_tag; smd_related_tags: added DB columns from recent Txp releases; fixed information_schema warning on new installs (thanks jayrope); fixed missing tag lists if no categories defined; fixed bogus URLs in subdir installs in smd_tag_name (thanks sacripant / jpdupont); fixed SQL error when deleting non-orphan tags (thanks tye); fixed if_tag_list context trigger with empty URL params; fixed smd_tag_list on empty list and non-list pages; made smd_tag_name play with gbp_permanent_links; fixed smd_related_tags in showall context; swapped @&nbsp;@ for @&#160;@
-* 05 Feb 2011 | 0.40 | Added live search and multi-edit functions; improved performance; added tag import from tru_tags and rss_unlimited_categories; enabled delimited tag entry; fixed rogue slashes in cat lists; fixed URL handler and smd_tag_name to support per-section tag lists, clean URL syntax, and enabled multiple trigger words (all thanks jakob); PHP 5.3 compatibility fix (thanks birdhouse); fixed warnings in smd_related_tags; fixed tag list when no linked cats selected and when category changed; added 'list' and 'group' tag display options; added @sort@, @showall@ and @flavour@ to smd_tag_list for tree and tag cloud support; added @lettername@, @lettertitle@ and @weight@ items to smd_tag_info for building alphabetic tag groups and clouds; changed table collation to utf8_general_ci and improved unicode support; fixed bug in smd_if_tag (again!) when using non-eq tests; added @style@ to smd_tag_name and smd_tag_count
 # --- END PLUGIN HELP ---
 -->
 <?php
