@@ -408,7 +408,7 @@ function smd_tags($evt, $stp) {
 		'smd_tags_prefs_remove'     => true,
 		'smd_tags_prefs_update'     => true,
 		'smd_tags_sync'             => false,
-		'smd_tags_table_install'    => true,
+		'smd_tags_table_install'    => false,
 		'smd_tags_table_remove'     => true,
 		'smd_tags_table_rebuild'    => true,
 	);
