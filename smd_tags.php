@@ -216,7 +216,7 @@ if (!defined('txpinterface'))
  * @link   http://stefdawson.com/
  *
  * @todo
- * Update for 4.5.x:
+ * Update for 4.6.x:
  *   Inputs surrounded with graf()
  *   Table class alteration and listtable wrapper
  *   Prefs screen to use inputLabel() and new wrapper div
@@ -1465,7 +1465,7 @@ jQuery(function() {
 		// Update the UI
 		smd_parentHandler(nam, typ, tid, par);
 		smd_catHandler(cat, typ);
-		jQuery(".smd_tags_linkcat select option[value='"+cat+"']").attr("selected", true);
+		jQuery(".smd_tags_linkcat select option[value='"+cat+"']").prop("selected", true);
 		smd_autofocus();
 		smd_cellHandler();
 		jQuery("input[name='smd_tags_type']").each(function () {
@@ -1552,7 +1552,7 @@ function smd_cellHandler() {
 				jQuery("input[name='smd_tag_id']").val(tid);
 				jQuery("input[name='smd_tags_newtitle']").val(ttl);
 				jQuery("textarea[name='smd_tags_description']").val(dsc);
-				jQuery(".smd_tags_linkcat select option[value='"+cat+"']").attr("selected", true);
+				jQuery(".smd_tags_linkcat select option[value='"+cat+"']").prop("selected", true);
 				smd_parentHandler(nam, typ, tid, par);
 				jQuery(".smd_tags_showlist ${sel}").removeClass('smd_current');
 				jQuery(this).addClass('smd_current');
@@ -1568,9 +1568,9 @@ function smd_parentHandler(nam, typ, tid, par) {
 		function(data) {
 			jQuery(".smd_tags_showpars").html(data);
 			if (par == "root" || par == "") {
-				jQuery(".smd_tags_showpars select option:first").attr("selected", true);
+				jQuery(".smd_tags_showpars select option:first").prop("selected", true);
 			} else {
-				jQuery(".smd_tags_showpars select option[value='"+par+"']").attr("selected", true);
+				jQuery(".smd_tags_showpars select option[value='"+par+"']").prop("selected", true);
 			}
 		}
 	);
@@ -1583,9 +1583,9 @@ function smd_catHandler(cat, typ) {
 		function(data) {
 			jQuery(".smd_tags_linkcat").html(data);
 			if (cat == "root" || cat == "") {
-				jQuery(".smd_tags_linkcat select option:first").attr("selected", true);
+				jQuery(".smd_tags_linkcat select option:first").prop("selected", true);
 			} else {
-				jQuery(".smd_tags_linkcat select option[value='"+cat+"']").attr("selected", true);
+				jQuery(".smd_tags_linkcat select option[value='"+cat+"']").prop("selected", true);
 			}
 			jQuery(".smd_tags_linkcat").fadeTo("normal", 1);
 		}
