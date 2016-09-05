@@ -362,6 +362,18 @@ if (@txpinterface === 'admin') {
          '#smd_tag_report_pane { display:none; position:absolute; left:200px; max-width:500px; border:3px ridge #999; opacity:.92; filter:alpha(opacity:92); padding:15px 20px; background-color:#e2dfce; color:#80551e; }
          #smd_tag_report_pane .publish { float:right; }',
 	);
+} elseif (txpinterface === 'public') {
+    if (class_exists('\Textpattern\Tag\Registry')) {
+        Txp::get('\Textpattern\Tag\Registry')
+            ->register('smd_tag_list')
+            ->register('smd_tag_name')
+            ->register('smd_tag_count')
+            ->register('smd_tag_info')
+            ->register('smd_if_tag')
+            ->register('smd_if_tag_list')
+            ->register('smd_related_tags');
+    }
+
 }
 
 if (!defined('SMD_TAG')) {
@@ -904,77 +916,72 @@ function smd_tags_table_exist($all='0') {
 function smd_tags_table_install($showpane='1') {
 	global $DB;
 
-	$version = mysql_get_server_info();
 	$debug = gps('debug');
 	$GLOBALS['txp_err_count'] = 0;
-	if ($version < "4.1.2") {
-		$GLOBALS['txp_err_count']++;
-		trigger_error("smd_tags requires MySQL v4.1.2 or greater.");
-	} else {
-		$ret = '';
-		$sql = array();
-		$sql[] = "CREATE TABLE IF NOT EXISTS `".PFX.SMD_TAG."` (
-			`id` int(6) NOT NULL auto_increment,
-			`name` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
-			`type` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
-			`parent` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
-			`lft` int(6) NOT NULL default '0',
-			`rgt` int(6) NOT NULL default '0',
-			`title` varchar(255) NOT NULL default '' COLLATE utf8_general_ci,
-			`description` text NULL COLLATE utf8_general_ci,
-			`desc_html` text NULL COLLATE utf8_general_ci,
-			PRIMARY KEY (`id`)
-		) ENGINE=MyISAM PACK_KEYS=1 AUTO_INCREMENT=5 CHARACTER SET=utf8";
 
-		if (!smd_tags_table_exist()) {
-			$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (1, 'root', 'article', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
-			$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (2, 'root', 'link', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
-			$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (3, 'root', 'image', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
-			$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (4, 'root', 'file', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
-		}
+	$ret = '';
+	$sql = array();
+	$sql[] = "CREATE TABLE IF NOT EXISTS `".PFX.SMD_TAG."` (
+		`id` int(6) NOT NULL auto_increment,
+		`name` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
+		`type` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
+		`parent` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
+		`lft` int(6) NOT NULL default '0',
+		`rgt` int(6) NOT NULL default '0',
+		`title` varchar(255) NOT NULL default '' COLLATE utf8_general_ci,
+		`description` text NULL COLLATE utf8_general_ci,
+		`desc_html` text NULL COLLATE utf8_general_ci,
+		PRIMARY KEY (`id`)
+	) ENGINE=MyISAM PACK_KEYS=1 AUTO_INCREMENT=5 CHARACTER SET=utf8";
 
-		$sql[] = "CREATE TABLE IF NOT EXISTS `".PFX.SMD_TAGC."` (
-			`tag_id` int(6) NOT NULL default '0',
-			`cat_id` int(6) NOT NULL default '0',
-			PRIMARY KEY (`tag_id`,`cat_id`)
-		) ENGINE=MyISAM";
+	if (!smd_tags_table_exist()) {
+		$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (1, 'root', 'article', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
+		$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (2, 'root', 'link', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
+		$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (3, 'root', 'image', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
+		$sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (4, 'root', 'file', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
+	}
 
-		$sql[] = "CREATE TABLE IF NOT EXISTS `".PFX.SMD_TAGU."` (
-			`item_id` int(11) NOT NULL default '0',
-			`tag_id` int(6) NOT NULL default '0',
-			`type` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
-			PRIMARY KEY (`item_id`,`tag_id`)
-		) ENGINE=MyISAM CHARACTER SET=utf8";
+	$sql[] = "CREATE TABLE IF NOT EXISTS `".PFX.SMD_TAGC."` (
+		`tag_id` int(6) NOT NULL default '0',
+		`cat_id` int(6) NOT NULL default '0',
+		PRIMARY KEY (`tag_id`,`cat_id`)
+	) ENGINE=MyISAM";
 
-		if($debug) {
-			dmp($sql);
-		}
-		foreach ($sql as $qry) {
-			$ret = safe_query($qry);
-			if ($ret===false) {
-				$GLOBALS['txp_err_count']++;
-				echo "<b>" . $GLOBALS['txp_err_count'] . ".</b> " . mysql_error() . "<br />\n";
-				echo "<!--\n $qry \n-->\n";
-			}
-		}
+	$sql[] = "CREATE TABLE IF NOT EXISTS `".PFX.SMD_TAGU."` (
+		`item_id` int(11) NOT NULL default '0',
+		`tag_id` int(6) NOT NULL default '0',
+		`type` varchar(64) NOT NULL default '' COLLATE utf8_general_ci,
+		PRIMARY KEY (`item_id`,`tag_id`)
+	) ENGINE=MyISAM CHARACTER SET=utf8";
 
-		// Upgrade table collation if necessary
-		$ret = getRows("SHOW TABLE STATUS WHERE name IN ('".PFX.SMD_TAG."', '".PFX.SMD_TAGU."')");
-		if ($ret[0]['Collation'] != 'utf8_general_ci') {
-			$ret = safe_alter(SMD_TAG, 'CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci', $debug);
+	if($debug) {
+		dmp($sql);
+	}
+	foreach ($sql as $qry) {
+		$ret = safe_query($qry);
+		if ($ret===false) {
+			$GLOBALS['txp_err_count']++;
+			echo "<b>" . $GLOBALS['txp_err_count'] . ".</b> " . mysqli_error($DB->link) . "<br />\n";
+			echo "<!--\n $qry \n-->\n";
 		}
-		if ($ret[1]['Collation'] != 'utf8_general_ci') {
-			$ret = safe_alter(SMD_TAGU, 'CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci', $debug);
-		}
+	}
 
-		// Add the description column on upgrade
-		$flds = getThings('SHOW COLUMNS FROM `'.PFX.SMD_TAG.'`');
-		if (!in_array('description',$flds)) {
-			safe_alter(SMD_TAG, "ADD `description` TEXT NULL AFTER `title`", $debug);
-		}
-		if (!in_array('desc_html',$flds)) {
-			safe_alter(SMD_TAG, "ADD `desc_html` TEXT NULL AFTER `description`", $debug);
-		}
+	// Upgrade table collation if necessary
+	$ret = getRows("SHOW TABLE STATUS WHERE name IN ('".PFX.SMD_TAG."', '".PFX.SMD_TAGU."')");
+	if ($ret[0]['Collation'] != 'utf8_general_ci') {
+		$ret = safe_alter(SMD_TAG, 'CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci', $debug);
+	}
+	if ($ret[1]['Collation'] != 'utf8_general_ci') {
+		$ret = safe_alter(SMD_TAGU, 'CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci', $debug);
+	}
+
+	// Add the description column on upgrade
+	$flds = getThings('SHOW COLUMNS FROM `'.PFX.SMD_TAG.'`');
+	if (!in_array('description',$flds)) {
+		safe_alter(SMD_TAG, "ADD `description` TEXT NULL AFTER `title`", $debug);
+	}
+	if (!in_array('desc_html',$flds)) {
+		safe_alter(SMD_TAG, "ADD `desc_html` TEXT NULL AFTER `description`", $debug);
 	}
 
 	if ($GLOBALS['txp_err_count'] == 0) {
@@ -991,6 +998,8 @@ function smd_tags_table_install($showpane='1') {
 // ------------------------
 // Drop tag tables if in database
 function smd_tags_table_remove() {
+	global $DB;
+
 	$ret = '';
 	$sql = array();
 	$GLOBALS['txp_err_count'] = 0;
@@ -1005,7 +1014,7 @@ function smd_tags_table_remove() {
 			$ret = safe_query($qry);
 			if ($ret===false) {
 				$GLOBALS['txp_err_count']++;
-				echo "<b>" . $GLOBALS['txp_err_count'] . ".</b> " . mysql_error() . "<br />\n";
+				echo "<b>" . $GLOBALS['txp_err_count'] . ".</b> " . mysqli_error($DB->link) . "<br />\n";
 				echo "<!--\n $qry \n-->\n";
 			}
 		}
@@ -3717,28 +3726,33 @@ function smd_related_tags($atts, $thing='') {
 		}
 	}
 
+	$cfs = getCustomfields();
+	$cfKeys = implode(',', array_map(
+		function($k) { return 'custom_' . $k; }, array_keys($cfs)
+	));
+
 	// Lookup table for making SQL queries
 	$sqlStubs = array(
 		"article" => array(
-			"select" => "*,unix_timestamp(Posted) as uPosted, unix_timestamp(LastMod) as uLastMod, unix_timestamp(Expires) as uExpires, COUNT(smt.name) as tag_sum",
+			"select" => "txp.ID, Posted, Expires, AuthorID, LastMod, LastModID, txp.Title, Title_html, Body, Body_html, Excerpt, Excerpt_html, Image, Category1, Category2, Annotate, AnnotateInvite, comments_count, Status, textile_body, textile_excerpt, Section, override_form, Keywords, txp.description, url_title" . ($cfKeys ? ','. $cfKeys : '') . ", uid, feed_time, position, unix_timestamp(Posted) as uPosted, unix_timestamp(LastMod) as uLastMod, unix_timestamp(Expires) as uExpires, COUNT(smt.name) as tag_sum",
 			"table" => "textpattern",
 			"gtags" => $thisarticle,
 			"gid" => "thisid",
 		),
 		"image" => array(
-			"select" => "*, COUNT(smt.name) as tag_sum",
+			"select" => "txp.id, txp.name, txp.category, txp.ext, txp.w, txp.h, txp.alt, txp.caption, txp.date, txp.author, txp.thumb_w, txp.thumb_h, txp.thumbnail, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title, COUNT(smt.name) as tag_sum",
 			"table" => "txp_image",
 			"gtags" => $thisimage,
 			"gid" => "id",
 		),
 		"file" => array(
-			"select" => "*, COUNT(smt.name) as tag_sum",
+			"select" => "txp.id, txp.filename, txp.title, txp.category, txp.permissions, txp.description, txp.downloads, txp.status, txp.modified, txp.created, txp.size, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title, COUNT(smt.name) as tag_sum",
 			"table" => "txp_file",
 			"gtags" => $thisfile,
 			"gid" => "id",
 		),
 		"link" => array(
-			"select" => "*, COUNT(smt.name) as tag_sum",
+			"select" => "txp.id, txp.date, txp.category, txp.url, txp.linkname, txp.linksort, txp.description, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title, COUNT(smt.name) as tag_sum",
 			"table" => "txp_link",
 			"gtags" => $thislink,
 			"gid" => "id",
@@ -3849,11 +3863,11 @@ function smd_related_tags($atts, $thing='') {
 
 	switch ($type) {
 		case "article":
-			$rs = getRows("SELECT SQL_CALC_FOUND_ROWS ".$sqlStubs[$type]["select"]." FROM ".safe_pfx($sqlStubs[$type]["table"])." AS txp
+			$rs = getRows("SELECT SQL_CALC_FOUND_ROWS " . $sqlStubs[$type]["select"] . " FROM " . safe_pfx($sqlStubs[$type]["table"]) . " AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'article'" . $statSQL . $excludeClause . $sectionClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
-			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentResult = mysqli_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
 			$contentCount = $contentResult['found'];
 
 			if ($rs) {
@@ -3872,13 +3886,11 @@ function smd_related_tags($atts, $thing='') {
 			}
 			break;
 		case "image":
-			$rs = getRows("
-				SELECT SQL_CALC_FOUND_ROWS txp.id, txp.name, txp.category, txp.ext, txp.w, txp.h, txp.alt, txp.caption, txp.date, txp.author, txp.thumb_w, txp.thumb_h, txp.thumbnail, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
-				FROM ".safe_pfx('txp_image')." AS txp
+			$rs = getRows("SELECT SQL_CALC_FOUND_ROWS " . $sqlStubs[$type]["select"] . " FROM " . safe_pfx($sqlStubs[$type]["table"]) . " AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'image'" . $excludeClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
-			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentResult = mysqli_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
 			$contentCount = $contentResult['found'];
 
 			if ($rs) {
@@ -3896,13 +3908,11 @@ function smd_related_tags($atts, $thing='') {
 			}
 			break;
 		case "file":
-			$rs = getRows("
-				SELECT SQL_CALC_FOUND_ROWS txp.id, txp.filename, txp.title, txp.category, txp.permissions, txp.description, txp.downloads, txp.status, txp.modified, txp.created, txp.size, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
-				FROM ".safe_pfx('txp_file')." AS txp
+			$rs = getRows("SELECT SQL_CALC_FOUND_ROWS " . $sqlStubs[$type]["select"] . " FROM " . safe_pfx($sqlStubs[$type]["table"]) . " AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'file'" . $statSQL . $excludeClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
-			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentResult = mysqli_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
 			$contentCount = $contentResult['found'];
 
 			if ($rs) {
@@ -3920,13 +3930,11 @@ function smd_related_tags($atts, $thing='') {
 			}
 			break;
 		case "link":
-			$rs = getRows("
-				SELECT SQL_CALC_FOUND_ROWS txp.id, txp.date, txp.category, txp.url, txp.linkname, txp.linksort, txp.description, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title
-				FROM ".safe_pfx('txp_link')." AS txp
+			$rs = getRows("SELECT SQL_CALC_FOUND_ROWS " . $sqlStubs[$type]["select"] . " FROM " . safe_pfx($sqlStubs[$type]["table"]) . " AS txp
 				LEFT JOIN ".PFX.SMD_TAGU. " AS tu ON txp.id = tu.item_id
 				LEFT JOIN ".PFX.SMD_TAG. " AS smt ON tu.tag_id = smt.id
 				WHERE tu.type = 'link'" . $excludeClause . $matchClause . ' GROUP BY txp.id' . $and_modeClause . $orderBy, $debug);
-			$contentResult = mysql_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
+			$contentResult = mysqli_fetch_assoc(safe_query('SELECT FOUND_ROWS() AS found', $debug));
 			$contentCount = $contentResult['found'];
 
 			if ($rs) {
