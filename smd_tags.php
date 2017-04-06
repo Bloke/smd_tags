@@ -17,7 +17,7 @@ $plugin['name'] = 'smd_tags';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.51';
+$plugin['version'] = '0.52';
 $plugin['author'] = 'Stef Dawson';
 $plugin['author_uri'] = 'http://stefdawson.com/';
 $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and links';
@@ -416,7 +416,7 @@ function smd_tags($evt, $stp) {
 		'smd_tags_multi_set_parent' => true,
 		'smd_tags_multi_catlink'    => true,
 		'smd_tags_prefs_show'       => false,
-		'smd_tags_prefs_install'    => true,
+		'smd_tags_prefs_install'    => false,
 		'smd_tags_prefs_remove'     => true,
 		'smd_tags_prefs_update'     => true,
 		'smd_tags_sync'             => false,
@@ -1046,7 +1046,7 @@ function smd_tags_prefs_install($message='', $showpane='1') {
 	$ctr = safe_count('txp_prefs', 'event="smd_tags"') + 1;
 	foreach ($smd_tag_prefs[0] as $pref => $dflt) {
 		if (!fetch('name','txp_prefs','name',$pref)) {
-			$id = safe_insert('txp_prefs','prefs_id=1, name='.doQuote(doSlash($pref)).', val='.doQuote(doSlash($dflt)).', event="smd_tags", position="'.$ctr.'"');
+			$id = safe_insert('txp_prefs', 'name='.doQuote(doSlash($pref)).', val='.doQuote(doSlash($dflt)).', event="smd_tags", position="'.$ctr.'"');
 			$ctr++;
 		}
 	}
@@ -1086,7 +1086,7 @@ function smd_tags_prefs_update($message = '') {
 	$post = doSlash(stripPost());
 	foreach ($smd_tag_prefs[0] as $pref => $dflt) {
 		if (isset($post[$pref])) {
-			safe_update("txp_prefs", "val = '".$post[$pref]."'", "name = '".doSlash($pref)."' and prefs_id = 1");
+			safe_update("txp_prefs", "val = '".$post[$pref]."'", "name = '".doSlash($pref)."'");
 		}
 	}
 	$message .= gTxt('preferences_saved');
