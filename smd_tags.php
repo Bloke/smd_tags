@@ -344,12 +344,12 @@ function smd_tags($evt, $stp)
         'smd_tags_multi_catlink'    => true,
         'smd_tags_prefs_show'       => false,
         'smd_tags_prefs_install'    => false,
-        'smd_tags_prefs_remove'     => true,
+        'smd_tags_prefs_remove'     => false,
         'smd_tags_prefs_update'     => true,
         'smd_tags_sync'             => false,
         'smd_tags_table_install'    => false,
-        'smd_tags_table_remove'     => true,
-        'smd_tags_table_rebuild'    => true,
+        'smd_tags_table_remove'     => false,
+        'smd_tags_table_rebuild'    => false,
     );
 
     if (!$stp or !bouncer($stp, $available_steps)) {
