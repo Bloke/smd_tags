@@ -56,7 +56,7 @@ $plugin['flags'] = '3';
 
 $plugin['textpack'] = <<<EOT
 #@smd_tag
-smd_tags => smd_tags
+smd_tags => Tags (smd)
 smd_tag_ac_std => Standard
 smd_tag_ac_str => Strict
 smd_tag_all_lbl => All
@@ -91,7 +91,7 @@ smd_tag_link_to_cat_lbl => Link to category
 smd_tag_manage_lbl => Manage tags
 smd_tag_missing_rep_lbl => Missing tags:
 smd_tag_multi_delete => Tags deleted: {number} (see report for details)
-smd_tag_not_available => smd_tags tables are not installed
+smd_tag_not_available => Tables are not installed
 smd_tag_not_created => {type} tag "{name}" NOT created
 smd_tag_not_created_rep_lbl => Tags NOT created:
 smd_tag_not_parent_linked_lbl => Not linked:
@@ -115,7 +115,7 @@ smd_tag_prefs_some_opts1 => Choose "Remove prefs" to remove them all or "Install
 smd_tag_prefs_some_opts2 => Click "Install tables" to add or update the tables<br />leaving all existing data untouched.
 smd_tag_prefs_some_tbl => Not all table info available.
 smd_tag_prefs_t => Tag management
-smd_tag_prefs_title => smd_tags Preferences
+smd_tag_prefs_title => Tag Preferences
 smd_tag_prefs_u => URL management
 smd_tag_pref_install_lbl => Install prefs
 smd_tag_pref_remove_lbl => Remove prefs
@@ -216,11 +216,7 @@ if (!defined('txpinterface'))
  * @link   http://stefdawson.com/
  *
  * @todo
- * Update for 4.6.x:
- *   Inputs surrounded with graf()
- *   Table class alteration and listtable wrapper
- *   Prefs screen to use inputLabel() and new wrapper div
- *   Alter tag pool layout to allow collapsing groups of parent->children
+ * Alter tag pool layout to allow collapsing groups of parent->children
  * Use article_row_info(), link_format_info()
  * Investigate storing tag data as jQuery .data() instead of in <span>s (from Txp 4.6+ it can be done in HTML data-* attributes)
  * Pagination of tag lists / related content
@@ -233,11 +229,9 @@ if (!defined('txpinterface'))
  * Query tags without section/article context (Dwayne: http://forum.textpattern.com/viewtopic.php?pid=246750#p246750)
  * On list pages:
  *   AJAX fetch of the tag set for TextArea and TextArea+ modes to improve page load time (plus we then only grab the ones in the current category hierarchy)
- *   Option for bi-directional lookup of tags from the current category, i.e. grandparents and children (from aswihart http://forum.textpattern.com/viewtopic.php?pid=232445#p232445)
  *   Add autocomplete options to smd_tags prefs so autofill etc can be configured (from aswihart)
  *   Check what happens when deleting content (e.g. images): it sometimes triggers " '' is not an Integer " assertion (from curiouz http://forum.textpattern.com/viewtopic.php?pid=236023#p236023)
  *   Perhaps offer sort option for List mode to a) retain hierarchy, b) strict alphabetical, c) group them somehow to show how sets of tags are related (from pieman)
- * Use head_end step for style block
  * @tofix
  * Sanitize tags from custom fields / cats during import
  * Blob of output from AJAX (cf. "If you spot such JavaScript responses your plugin breaks AJAX at the write tab, for instance by echo()ing something as text/html when send_script_response() with text/javascript would be the proper reply with the expected mime type.")
@@ -857,6 +851,7 @@ function smd_tags_get_style_rules()
         '.smd_tooltip { position:absolute; background:#eee; max-width:300px; min-width:150px; border:1px solid black; padding:1em; box-shadow:5px 5px 4px #999; }',
         '#smd_tag_report_pane { display:none; position:absolute; left:200px; max-width:500px; border:3px ridge #999; opacity:.92; filter:alpha(opacity:92); padding:15px 20px; background-color:#e2dfce; color:#80551e; }',
         '#smd_tag_report_pane .publish { float:right; }',
+        '.smd_tags_btn_ok { position: absolute; top: .27777777777778em; right: .72222222222222em; font-size: 18px; font-weight: 700; text-decoration: none; }',
         '.txp-actions { float:right; }',
     );
 
@@ -1503,11 +1498,11 @@ function smd_tags_manage($message = '', $report = '')
 
     foreach ($types as $key => $val) {
         $id = 'smd_tags_type-'.$key;
-        $radios[] = n.t.radio('smd_tags_type', $key, ($smd_tag_type == $key) ? 1 : 0, $id).
+        $radios[] = n.radio('smd_tags_type', $key, ($smd_tag_type == $key) ? 1 : 0, $id).n.
                 '<label for="'.$id.'">'.$val.'</label>';
     }
 
-    $radios = join(sp.sp, $radios).n;
+    $radios = join(n, $radios).n;
 
     // Create all the lists but hide them with CSS.
     // jQuery takes over and switches between them on demand.
@@ -1660,6 +1655,8 @@ jQuery(function() {
     if ('{$showrep}') {
         smd_tags_toggle_report();
     }
+
+    jQuery('#smd_tags_report_toggler, .smd_tags_btn_ok').on('click', smd_tags_toggle_report_handler);
 });
 
 // Keep track of which tag has been clicked so it can be edited/updated
@@ -1811,8 +1808,16 @@ function smd_tags_seledit(obj) {
     }
 }
 
+/**
+ * jQuery callback for displaying tag report.
+ */
+function smd_tags_toggle_report_handler(ev) {
+    ev.preventDefault();
+    smd_tags_toggle_report();
+}
+
 function smd_tags_toggle_report() {
-    jQuery("#smd_tag_report_pane").toggle('normal');
+    jQuery("#smd_tag_report_pane").toggle('fast');
 }
 EOJS
         );
@@ -1869,14 +1874,13 @@ EOJS
                 .n. '<span id="smd_tag_filter_count"></span>'
                 .n. '<div id="smd_tag_filt_radios">'.radioSet($filtopts, 'smd_tag_filtopt', 'smd_all', '', 'smd_tag_filtopt').'</div>'
                 .n. '<div id="smd_tag_multisel">'.gTxt('smd_tag_with_filtered').selectInput('smd_tag_multisel',$withselopts, '', true, ' onchange="smd_tags_seledit(this); return false;"').n.fInput('submit', '', gTxt('go'), 'publish').'</div>'
-                .n. '<div id="smd_tag_multi_placeholder"></div><a name="smd_tags_report_toggler" onclick="smd_tags_toggle_report();">'.gTxt('smd_tag_recent_report').'</a>'
+                .n. '<div id="smd_tag_multi_placeholder"></div><a href="#" id="smd_tags_report_toggler">'.gTxt('smd_tag_recent_report').'</a>'
                 .n. '</div>'
                 .n. '</fieldset>'
                 .n. '</form>';
 
             // Report popup
-            // TODO: jQuery UI in 4.6
-            echo n. '<div id="smd_tag_report_pane"><div><input type="button" class="publish smd_tags_btn_ok" value="'.gTxt('ok').'" onclick="smd_tags_toggle_report();" /><h2>'.gTxt('smd_tag_report_lbl').'</h2>'.$report.'</div></div>'
+            echo n. '<div id="smd_tag_report_pane"><div>'.href('&#215;', '#close', ' class="smd_tags_btn_ok" role="button" title="'.gTxt('close').'" aria-label="'.gTxt('close').'"').'<h3>'.gTxt('smd_tag_report_lbl').'</h3>'.$report.'</div></div>'
                 .n. '<form method="post" id="smd_tag_postit" action="?event=smd_tags">'
                 .n. hInput('step', '')
                 .n. hInput('smd_tag_id', $smd_tag_id)
@@ -2493,15 +2497,26 @@ jQuery(function() {
     }
 
     jQuery('input[name="smd_tags_sync_type"]').change(function() {
-        if (jQuery(this + ':checked').val() == '3') {
+        if (jQuery(this).filter(':checked').val() == '3') {
             jQuery('.smd_tags_sync_txp').show();
         } else {
             jQuery('.smd_tags_sync_txp').hide();
         }
     }).change();
+
+    jQuery('#smd_tags_report_toggler, .smd_tags_btn_ok').on('click', smd_tags_toggle_report_handler);
 });
+
+/**
+ * jQuery callback for displaying tag report.
+ */
+function smd_tags_toggle_report_handler(ev) {
+    ev.preventDefault();
+    smd_tags_toggle_report();
+}
+
 function smd_tags_toggle_report() {
-    jQuery("#smd_tag_report_pane").toggle('normal');
+    jQuery("#smd_tag_report_pane").toggle('fast');
 }
 EOS
     );
@@ -2511,7 +2526,8 @@ EOS
         // Tables installed
         if ($numPrefs == $numReqPrefs) {
             // Prefs all installed
-            echo '<div class="txp-layout">'.
+            echo '<form method="post" id="smd_syncit" action="?event=smd_tags&step=smd_tags_sync">'.
+                n.'<div class="txp-layout">'.
                 n. '<div class="txp-layout-2col">'.
                 n. hed(gTxt('smd_tag_sync_lbl').sp.$btnHelp, 1).
                 n. '</div>'.
@@ -2524,106 +2540,194 @@ EOS
 
             echo n. '<div id="smd_tag_report_pane">'
                 .n. '<div>'
-                .n. '<input type="button" class="publish smd_tags_btn_ok" value="', gTxt('ok'), '" onclick="smd_tags_toggle_report();" />'
-                .n. '<h2>', gTxt('smd_tag_report_lbl'), '</h2>'
+                .n. href('&#215;', '#close', ' class="smd_tags_btn_ok" role="button" title="'.gTxt('close').'" aria-label="'.gTxt('close').'"')
+                .n. '<h3>', gTxt('smd_tag_report_lbl'), '</h3>'
                 .$report
                 .n. '</div>'
                 .n. '</div>'
-                .n. '<div class="txp-layout-1col">'
-                .n. '<form method="post" id="smd_syncit" action="?event=smd_tags&step=smd_tags_sync">'
-                .n. startTable('', '', 'txp-list');
+                .n. '<div class="txp-layout-1col">';
 
             $lblStyle = ' class="pref-label"';
 
-            echo tr(tdcs(hed(gTxt('smd_tag_sync_plugin_opts'), 3, ' class="pref-heading"'), 4));
+            echo '<a id="smd_tags_report_toggler" href="#">'.gTxt('smd_tag_recent_report').'</a>';
+            echo '<section class="txp-prefs-group">';
+            echo hed(gTxt('smd_tag_sync_plugin_opts'), 3);
+            $rset = array();
 
-            echo tr(
-                    tda('<label>'.gTxt('smd_tag_sync_type_lbl').'</label>', $lblStyle)
-                    .tda(
-                        (($plug_tt)
-                            ? radio('smd_tags_sync_type', 0, ((empty($smd_tags_sync_type)) ? 1 : ($plug_tt ? 1 : 0) )).gTxt('smd_tag_sync_type1').' '
-                            : ''
-                        )
-                        .(($plug_uc)
-                            ? radio('smd_tags_sync_type', 1, (($smd_tags_sync_type == '1') ? 1 : (($plug_uc && !$plug_tt) ? 1 : 0) )).gTxt('smd_tag_sync_type2').' '
-                            : ''
-                        )
-                        . radio('smd_tags_sync_type', 2, (($smd_tags_sync_type == '2') ? 1 : ((!$plug_uc && !$plug_tt) ? 1 : 0) )).gTxt('smd_tag_sync_type3')
-                        . radio('smd_tags_sync_type', 3, (($smd_tags_sync_type == '3') ? 1 : ((!$plug_uc && !$plug_tt && !$smd_tags_sync_type == '2') ? 1 : 0) )).gTxt('smd_tag_sync_type4')
-                    , ' class="pref-value"')
-                );
+            if ($plug_tt) {
+                $rset[0] = gTxt('smd_tag_sync_type1');
+            }
+
+            if ($plug_uc) {
+                $rset[1] = gTxt('smd_tag_sync_type2');
+            }
+
+            $rset[2] = gTxt('smd_tag_sync_type3');
+            $rset[3] = gTxt('smd_tag_sync_type4');
+
+            $rsel = 0;
+
+            if (empty($smd_tags_sync_type) || $plug_tt) {
+                $rsel = 0;
+            }
+
+            if ($smd_tags_sync_type == 1 || ($plug_uc && !$plug_tt)) {
+                $rsel = 1;
+            } elseif ($smd_tags_sync_type == 2 || (!$plug_uc && !$plug_tt)) {
+                $rsel = 2;
+            } elseif ($smd_tags_sync_type == 3 || (!$plug_uc && !$plug_tt && !$smd_tags_sync_type == 2)) {
+                $rsel = 3;
+            }
+
+            echo inputLabel(
+                'smd_tags_sync_type',
+                radioSet($rset, 'smd_tags_sync_type', $rsel),
+                'smd_tag_sync_type_lbl',
+                '',
+                array(
+                    'class' => 'txp-form-field',
+                    'id'    => 'prefs-smd_tags_sync_type',
+                )
+            );
 
             // Txp category / custom_field import options
             $cfs = getCustomFields();
 
-            echo ($cfs) ? tr(
-                tda(
-                    '<label>'.gTxt('smd_tag_sync_cfs_lbl').'</label>', $lblStyle
+            echo ($cfs)
+                ? inputLabel(
+                    'smd_tags_sync_cfs',
+                    selectInput('smd_tags_sync_cfs', $cfs, $smd_tags_sync_cfs, true),
+                    'smd_tag_sync_cfs_lbl',
+                    '',
+                    array(
+                        'class' => 'txp-form-field smd_tags_sync_txp',
+                        'id'    => 'prefs-smd_tags_sync_cfs',
                     )
-                . tag(selectInput('smd_tags_sync_cfs', $cfs, $smd_tags_sync_cfs, true), 'td', ' class="pref-value"')
-            , ' class="smd_tags_sync_txp"') : '';
+                )
+                : '';
 
-            echo ($cfs) ? tr(
-                tda(
-                    '<label>'.gTxt('smd_tag_sync_cfs_delim_lbl').'</label>', $lblStyle
+            echo ($cfs)
+                ? inputLabel(
+                    'smd_tags_sync_cfs_delim',
+                    fInput(
+                        'text',
+                        'smd_tags_sync_cfs_delim',
+                        ($smd_tags_sync_cfs_delim ? $smd_tags_sync_cfs_delim : ','),
+                        '',
+                        '',
+                        '',
+                        INPUT_XSMALL),
+                    'smd_tag_sync_cfs_delim_lbl',
+                    '',
+                    array(
+                        'class' => 'txp-form-field smd_tags_sync_txp',
+                        'id'    => 'prefs-smd_tags_sync_cfs_delim',
                     )
-                . tag(fInput('text', 'smd_tags_sync_cfs_delim', ($smd_tags_sync_cfs_delim ? $smd_tags_sync_cfs_delim : ','), 'input-xsmall', '', '', 4), 'td', ' class="pref-value"')
-            , ' class="smd_tags_sync_txp"') : '';
-
+                )
+                : '';
 
             // Section import
             $rs = safe_column('name', 'txp_section', "name != 'default'");
+
             if ($rs) {
-                $out = tag(selectInput('smd_tags_sync_section', $rs, $smd_tags_sync_section, true), 'td', ' class="pref-value"');
+                $widget = selectInput('smd_tags_sync_section', $rs, $smd_tags_sync_section, true);
             } else {
-                $out = tag(gTxt('smd_tag_no_sections'), 'td', ' class="pref-value"');
+                $widget = gTxt('smd_tag_no_sections');
             }
 
-            echo tr(tda('<label for="smd_tags_sync_section">'.gTxt('smd_tag_sync_section_lbl').'</label>', $lblStyle) . $out);
+            echo inputLabel(
+                'smd_tags_sync_section',
+                $widget,
+                'smd_tag_sync_section_lbl',
+                '',
+                array(
+                    'class' => 'txp-form-field',
+                    'id'    => 'prefs-smd_tags_sync_section',
+                )
+            );
 
             // Start at parent category (rss_uc only)
             // The list is populated anyway even if the plugin isn't active because $rsCats is used later
             if ($clink) {
                 $rsCats = getTree('root', 'article');
+
                 if ($rsCats) {
-                    $catlist = tag(treeSelectInput('smd_tags_sync_parent', $rsCats, $smd_tags_sync_parent, 'smd_tags_sync_parent', 35).(($plug_tt) ? gTxt('smd_tag_rss_uc_only') : ''), 'td', ' class="pref-value"');
+                    $catlist = treeSelectInput('smd_tags_sync_parent', $rsCats, $smd_tags_sync_parent, 'smd_tags_sync_parent', 35)
+                        .(($plug_tt) ? gTxt('smd_tag_rss_uc_only') : '');
                 } else {
-                    $catlist = tag(gTxt('smd_tag_no_parent'), 'td', ' class="pref-value"');
+                    $catlist = gTxt('smd_tag_no_parent');
                 }
-                echo tr(tda('<label for="smd_tags_sync_parent">'.gTxt('smd_tag_sync_parent_lbl').'</label>', $lblStyle) . $catlist);
+
+                echo inputLabel(
+                    'smd_tags_sync_parent',
+                    $catlist,
+                    'smd_tag_sync_parent_lbl',
+                    '',
+                    array(
+                        'class' => 'txp-form-field',
+                        'id'    => 'prefs-smd_tags_sync_parent',
+                    )
+                );
             }
 
             // Delete original
-            echo tr(
-                    tda('<label for="smd_tags_delete_orig">'.gTxt('smd_tag_sync_delete_orig_lbl').'</label>', $lblStyle)
-                    .tda(yesnoRadio('smd_tags_delete_orig', $smd_tags_delete_orig).gTxt('smd_tag_rss_uc_tru_tags_only'), ' class="pref-value"')
-                );
+            echo inputLabel(
+                'smd_tags_delete_orig',
+                yesnoRadio('smd_tags_delete_orig', (int)$smd_tags_delete_orig).n.gTxt('smd_tag_rss_uc_tru_tags_only'),
+                'smd_tag_sync_delete_orig_lbl',
+                '',
+                array(
+                    'class' => 'txp-form-field',
+                    'id'    => 'prefs-smd_tags_delete_orig',
+                )
+            );
 
-            echo tr(tdcs(hed(gTxt('smd_tag_sync_import_opts'), 3, ' class="pref-heading"'), 4));
+            echo '</section>';
+            echo hed(gTxt('smd_tag_sync_import_opts'), 3);
+            echo '<section class="txp-prefs-group">';
+
             // Assign to category
             if ($clink) {
                 if ($rsCats) {
-                    $catlist = tag(treeSelectInput('smd_tags_import_cat_parent', $rsCats, $smd_tags_import_cat_parent, 'smd_tags_import_cat_parent', 35), 'td', ' class="pref-value"');
+                    $catlist = treeSelectInput('smd_tags_import_cat_parent', $rsCats, $smd_tags_import_cat_parent, 'smd_tags_import_cat_parent', 35);
                 } else {
-                    $catlist = tag(gTxt('smd_tag_no_parent'), 'td', ' class="pref-value"');
+                    $catlist = gTxt('smd_tag_no_parent');
                 }
 
-                echo tr(tda('<label for="smd_tags_import_cat_parent">'.gTxt('smd_tag_sync_parent_cat_lbl').'</label>', $lblStyle) . $catlist);
-                echo tr(tda('<label for="smd_tags_import_force_cat">'.gTxt('smd_tag_sync_force_cat_lbl').'</label>', $lblStyle) . td(checkbox('smd_tags_import_force_cat', 1, $smd_tags_import_force_cat)));
+                echo inputLabel(
+                    'smd_tags_import_cat_parent',
+                    $catlist .br. checkbox('smd_tags_import_force_cat', 1, (int)$smd_tags_import_force_cat, 0, 'smd_tags_import_force_cat').n.'<label for="smd_tags_import_force_cat">'.gTxt('smd_tag_sync_force_cat_lbl').'</label>',
+                    'smd_tag_sync_parent_cat_lbl',
+                    '',
+                    array(
+                        'class' => 'txp-form-field',
+                        'id'    => 'prefs-smd_tags_sync_parent_cat',
+                    )
+                );
             }
 
             // Assign to parent tag
-            echo tr(tda('<label for="smd_tags_import_tag_parent">'.gTxt('smd_tag_sync_parent_tag_lbl').'</label>', $lblStyle). td('<div id="smd_tags_import_tag_parent_holder"></div>'));
-            echo tr(tda('<label for="smd_tags_import_force_parent">'.gTxt('smd_tag_sync_force_parent_lbl').'</label>', $lblStyle) . td(checkbox('smd_tags_import_force_parent', 1, $smd_tags_import_force_parent)));
+            echo inputLabel(
+                'smd_tags_import_tag_parent',
+                '<div id="smd_tags_import_tag_parent_holder"></div>'
+                    .n.checkbox('smd_tags_import_force_parent', 1, (int)$smd_tags_import_force_parent, 0, 'smd_tags_import_force_parent').n.'<label for="smd_tags_import_force_parent">'.gTxt('smd_tag_sync_force_parent_lbl').'</label>',
+                'smd_tag_sync_parent_tag_lbl',
+                '',
+                array(
+                    'class' => 'txp-form-field',
+                    'id'    => 'prefs-smd_tags_sync_parent_tag',
+                )
+            );
 
             // Report viewer
-            echo tr(tda('<a name="smd_tags_report_toggler" onclick="smd_tags_toggle_report();">'.gTxt('smd_tag_recent_report').'</a>').tda(gTxt('smd_tag_import_results_pt1') . '<span id="smd_tags_import_icurr"></span><span id="smd_tags_import_itot"></span> ' . gTxt('smd_tag_import_results_pt2') . '<span id="smd_tags_import_lnk_curr"></span>'));
+            echo gTxt('smd_tag_import_results_pt1') . '<span id="smd_tags_import_icurr"></span><span id="smd_tags_import_itot"></span> '
+                .br. gTxt('smd_tag_import_results_pt2') . '<span id="smd_tags_import_lnk_curr"></span>';
+            echo '</section>';
 
-            echo tr(tda($btnSyncGo, $btnStyle));
-            echo endTable()
-                . tInput()
-                . '</form></div>';
-        } else if ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
+            echo n.$btnSyncGo;
+            echo tInput()
+                . '</div></form>';
+        } elseif ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
             // Prefs possibly corrupt, or plugin updated
             echo startTable()
                 .n. tr(tda(strong(gTxt('smd_tag_prefs_some')).br.br
