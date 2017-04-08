@@ -216,6 +216,7 @@ if (!defined('txpinterface'))
  * @link   http://stefdawson.com/
  *
  * @todo
+ * Remove EvalElse()
  * Alter tag pool layout to allow collapsing groups of parent->children
  * Use article_row_info(), link_format_info()
  * Investigate storing tag data as jQuery .data() instead of in <span>s (from Txp 4.6+ it can be done in HTML data-* attributes)
@@ -1427,7 +1428,7 @@ EOJS
             join(n, $prefOut).
             n.tag_end('div'). // End of .txp-layout-4col-3span.
             tInput();
-        } else if ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
+        } elseif ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
             // Prefs possibly corrupt, or plugin updated
             echo startTable()
                 .tr(tda(strong(gTxt('smd_tag_prefs_some')).br.br
@@ -1930,7 +1931,7 @@ EOJS
                     .n. '<div class="smd_tags_showlist">' . $tagout[$smd_tag_type] .n. '</div>'
                 .n.'</div>'
                 .n.'</div>';
-        } else if ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
+        } elseif ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
             // Prefs possibly corrupt, or plugin updated
             echo n. startTable()
                 .n. tr(
@@ -2263,7 +2264,7 @@ function smd_tags_delete() {
     } else {
         if ($ok) {
             $message = gTxt('smd_tag_deleted', array('{type}' => ucfirst($smd_tag_type), '{name}' => join(', ', $ok))).$msgExtra;
-        } else if ($notok) {
+        } elseif ($notok) {
             $message = gTxt('smd_tag_in_use', array('{type}' => ucfirst($smd_tag_type), '{name}' => join(', ', $notok)));
         }
     }
@@ -2859,12 +2860,12 @@ function smd_tags_import_one() {
             if ($key=='') continue;
             $keylist[] = array('name' => $key, 'title' => $key);
         }
-    } else if ($smd_tags_sync_type == '1') {
+    } elseif ($smd_tags_sync_type == '1') {
         // rss_uc
         $clause = 'tc.article_id = '.doSlash($smd_tags_sync_data);
         $keylist = getRows("SELECT c.name, c.title FROM ".PFX."textpattern_category as tc LEFT JOIN ".PFX."txp_category as c ON tc.category_id = c.id WHERE ".$clause.$smd_tags_sync_parent);
         $keylist = ($keylist) ? $keylist : array();
-    } else if ($smd_tags_sync_type == '2') {
+    } elseif ($smd_tags_sync_type == '2') {
         // txp cats
         $clause = 'txt.ID = '.doSlash($smd_tags_sync_data);
         $keylist = getRows("SELECT c.name, c.title FROM ".PFX."textpattern as txt LEFT JOIN ".PFX."txp_category as c ON (txt.Category1 = c.name OR txt.Category2 = c.name) WHERE ".$clause.$smd_tags_sync_parent);
@@ -2891,11 +2892,11 @@ function smd_tags_import_one() {
         if ($smd_tags_delete_orig) {
             if ($smd_tags_sync_type == '0') {
                 safe_update('textpattern', "Keywords=''", "id='".doSlash($smd_tags_sync_id)."'");
-            } else if ($smd_tags_sync_type == '1') {
+            } elseif ($smd_tags_sync_type == '1') {
                 safe_delete('textpattern_category', "article_id='".doSlash($smd_tags_sync_id)."'");
-            } else if ($smd_tags_sync_type == '2') {
+            } elseif ($smd_tags_sync_type == '2') {
                 // Conspicuously missing until such time as a suitable method can be found to deal with it
-            } else if ($smd_tags_sync_type == '3') {
+            } elseif ($smd_tags_sync_type == '3') {
                 safe_update('textpattern', "custom_$smd_tags_sync_cfs=''", "id='".doSlash($smd_tags_sync_id)."'");
             }
         }
@@ -2952,7 +2953,7 @@ function smd_tag_parentlist() {
             }
         }
         $cat = ($rsc) ? ' AND id IN ('.doQuote(join("','",$rsid)).')' : '';
-    } else if ($god != '' && $link_mode == '1') {
+    } elseif ($god != '' && $link_mode == '1') {
         $ids = safe_column('id', SMD_TAG, "type = '$type' AND parent = '" . doSlash($god) . "'");
         $cat = ($ids) ? ' AND id IN ('.doQuote(join("','",$ids)).')' : '';
     } else {
@@ -3088,7 +3089,7 @@ function smd_tags_url_handler($evt, $stp) {
 //              $_SERVER['REQUEST_URI'] = $subpath . $parts[0] . '/?' . serverSet('QUERY_STRING');
             }
         }
-    } else if ((count($parts) == 1) && (in_array($parts[0], $urlsec) || in_array(gps('s'), $urlsec))) {
+    } elseif ((count($parts) == 1) && (in_array($parts[0], $urlsec) || in_array(gps('s'), $urlsec))) {
         // Default or named section (or /title permlink mode) + possible messy tag syntax
         $theType = gps($urltyp);
         $smd_tag = gps($urlnam);
@@ -3099,11 +3100,9 @@ function smd_tags_url_handler($evt, $stp) {
     }
 }
 
-// TODO: cache?
 // ------------------------
 function smd_tags_set($typ, $tag='', $item='') {
     global $smd_tags;
-//  static $smd_tagstore;
 
     $smd_tags = array();
 
@@ -3131,7 +3130,7 @@ function smd_tags_set($typ, $tag='', $item='') {
                 $smd_tags['meta']['search_mode'] = 'single';
                 $smd_tags['meta']['tag_head'] = $smd_tags['meta']['tag_tail'] = $andlist[0];
             }
-        } else if ($num_or > 1) {
+        } elseif ($num_or > 1) {
             $smd_tags['meta']['search_mode'] = 'or';
             $smd_tags['meta']['tag_head'] = $taglist[0];
             $smd_tags['meta']['tag_tail'] = $taglist[count($taglist)-1];
@@ -3206,30 +3205,32 @@ function smd_tags_context() {
         $id = $thisimage['id'];
         $ctxt = 'image';
         $scp = $thisimage;
-    } else if(!empty($thisfile)) {
+    } elseif (!empty($thisfile)) {
         $id = $thisfile['id'];
         $ctxt = 'file';
         $scp = $thisfile;
-    } else if(!empty($thislink)) {
+    } elseif (!empty($thislink)) {
         $id = $thislink['id'];
         $ctxt = 'link';
         $scp = $thislink;
-    } else if(!empty($thisarticle)) {
+    } elseif (!empty($thisarticle)) {
         $id = $thisarticle['thisid'];
         $ctxt = 'article';
         $scp = $thisarticle;
     }
+
     if ($id) {
         smd_tags_set($ctxt, '', $id);
     }
 
-    if(isset($smd_tags[$ctxt])) {
+    if (isset($smd_tags[$ctxt])) {
         foreach($smd_tags[$ctxt] as $rid => $row) {
             if (is_int($rid)) {
                 $ids[] = $rid;
             }
         }
     }
+
     // TODO: is this needed to overwrite if tag already set?
     if (!empty($smd_thistag)) {
         $ids = array($smd_thistag['tag_id']);
@@ -3724,14 +3725,16 @@ function smd_if_tag ($atts, $thing) {
 }
 
 // ------------------------
-function smd_if_tag_list ($atts, $thing) {
+function smd_if_tag_list ($atts, $thing)
+{
     global $smd_tag_type;
     return parse(EvalElse($thing, (!empty($smd_tag_type))));
 }
 
 // ------------------------
 // Return name/title of current tag
-function smd_tag_name($atts, $thing='') {
+function smd_tag_name($atts = array(), $thing = null)
+{
     global $smd_thistag, $permlink_mode, $plugins;
 
     if (!smd_tags_table_exist()) {
@@ -3751,7 +3754,7 @@ function smd_tag_name($atts, $thing='') {
         'style'       => '',
         'pad_str'     => '',
         'pad_pos'     => 'left', // left/right/both with optional :in suffix to indicate if it's to go inside the link
-    ),$atts));
+    ), $atts));
 
     $smdpref = smd_tags_pref_get(array('smd_tag_u_sec', 'smd_tag_u_pnam', 'smd_tag_u_ptyp'), 1);
     $urlsec = do_list($smdpref['smd_tag_u_sec']['val']);
@@ -3800,7 +3803,8 @@ function smd_tag_name($atts, $thing='') {
 // ------------------------
 // Return # of items associated with this tag
 //TODO: think about per-section / per-category counts
-function smd_tag_count($atts, $thing='') {
+function smd_tag_count($atts = array(), $thing = null)
+{
     global $smd_thistag, $smd_tags;
 
     if (!smd_tags_table_exist()) {
@@ -3815,10 +3819,11 @@ function smd_tag_count($atts, $thing='') {
         'wrapcount'  => ' (:)',
         'showempty'  => '1',
         'paramdelim' => ':',
-    ),$atts));
+    ), $atts));
 
     $wrapcount = explode($paramdelim, $wrapcount); // do_list does a trim: don't want that
     $style = ($style) ? ' style="'.$style.'"' : '';
+
     if (count($wrapcount) == 1) {
         $wrapcount[1] = $wrapcount[0];
     }
@@ -3836,7 +3841,8 @@ function smd_tag_count($atts, $thing='') {
 
 // ------------------------
 // Return other info about the current tag
-function smd_tag_info($atts, $thing='') {
+function smd_tag_info($atts = array(), $thing = null)
+{
     global $smd_thistag;
 
     if (!smd_tags_table_exist()) {
@@ -3850,22 +3856,39 @@ function smd_tag_info($atts, $thing='') {
         'break'      => 'br',
         'class'      => __FUNCTION__,
         'breakclass' => '',
-    ),$atts));
+    ), $atts));
 
     $out = array();
-    $availableItems = array('id','name','title','description','lettername','lettertitle','type','parent','children','level','count','indent', 'weight');
     $items = do_list($item);
+    $availableItems = array(
+        'id',
+        'name',
+        'title',
+        'description',
+        'lettername',
+        'lettertitle',
+        'type',
+        'parent',
+        'children',
+        'level',
+        'count',
+        'indent',
+        'weight',
+    );
+
     foreach ($items as $whatnot) {
         if (in_array($whatnot, $availableItems)) {
             $out[] = $smd_thistag['tag_'.$whatnot];
         }
     }
+
     return doWrap($out, $wraptag, $break, $class, $breakclass);
 }
 
 // ------------------------
 // Related articles/images/files/links by tag
-function smd_related_tags($atts, $thing='') {
+function smd_related_tags($atts = array(), $thing = null)
+{
     global $thisarticle, $thisfile, $thislink, $thisimage, $pretext, $prefs, $smd_tags, $smd_thistag;
 
     static $smd_tags_pc;
@@ -3894,7 +3917,7 @@ function smd_related_tags($atts, $thing='') {
         'delim'      => ',',
         'paramdelim' => ':',
         'debug'      => '0',
-    ),$atts));
+    ), $atts));
 
     // Validate atts
     $validTypes = array('article','image','file','link');
@@ -3916,15 +3939,17 @@ function smd_related_tags($atts, $thing='') {
     $sectionClause = ($section) ? " AND txp.Section IN ('".join("','", doSlash(do_list($section)))."')" : '';
     $status = do_list($status);
     $stati = array();
+
     foreach ($status as $stat) {
         if (empty($stat)) {
             continue;
-        } else if (is_numeric($stat)) {
+        } elseif (is_numeric($stat)) {
             $stati[] = $stat;
         } else {
             $stati[] = getStatusNum($stat);
         }
     }
+
     $statSQL = ' AND txp.Status IN ('.join(',', $stati).')';
 
     $out = array();
@@ -3981,6 +4006,7 @@ function smd_related_tags($atts, $thing='') {
     // Extract stuff to match & make up query replacement variables
     $match = do_list($match, $paramdelim);
     $matchType = array_shift($match);
+
     if (count($match) == 0) {
         // Assume current type unless a tag is being matched (in which case, use $ctype)
         $matchWith = array($matchType);
@@ -3990,14 +4016,17 @@ function smd_related_tags($atts, $thing='') {
     }
 
     $matches = array();
+
     foreach ($matchWith as $matchItem) {
         if (strpos($matchItem, 'tag_') !== false) {
             $lookin = (isset($smd_tags[$matchType])) ? $smd_tags[$matchType] : ( (isset($smd_thistag)) ? $smd_thistag : array() );
         } else {
             $lookin = $sqlStubs[$matchType]["gtags"];
         }
+
         if (isset($lookin[$matchItem])) {
             $thismatch = $lookin[$matchItem];
+
             if (is_array($thismatch)) {
                 foreach ($thismatch as $subID => $subItem) {
                     if (in_array($subID, $idlist)) {
@@ -4009,6 +4038,7 @@ function smd_related_tags($atts, $thing='') {
             }
         }
     }
+
     $matches = array_unique($matches);
 
     // Should the tag hierarchy be taken into account?
@@ -4018,6 +4048,7 @@ function smd_related_tags($atts, $thing='') {
 
     if ($matches) {
         $parents = $children = array();
+
         if ($smd_tags_pc[$type]['all']) {
             $full_tag_tree = $smd_tags_pc[$type]['all'];
         } else {
@@ -4030,10 +4061,12 @@ function smd_related_tags($atts, $thing='') {
         if (!$smd_tags_pc[$type]['parlist'] || !$smd_tags_pc[$type]['chilist']) {
             foreach ($full_tag_tree as $node) {
                 $smd_tags_pc[$type]['parlist'][$node['name']] = $node['parent'];
+
                 if ($node['parent'] == 'root') {
                     $smd_tags_pc[$type]['chilist'][$node['name']] = array();
                 } else {
                     $smd_tags_pc[$type]['chilist'][$node['parent']][] = $node['name'];
+
                     foreach ($smd_tags_pc[$type]['chilist'] as $key => $nodes) {
                         if (in_array($node['parent'], $nodes)) {
                             $smd_tags_pc[$type]['chilist'][$key][] = $node['name'];
@@ -4044,9 +4077,10 @@ function smd_related_tags($atts, $thing='') {
         }
 
         // Reverse lookup to find parents of child
-        if ($bidir==1 || $bidir==3) {
+        if ($bidir == 1 || $bidir == 3) {
             foreach ($matches as $matchit) {
                 $theparent = $matchit;
+
                 while (array_key_exists($theparent, $smd_tags_pc[$type]['parlist'])) {
                     if ($smd_tags_pc[$type]['parlist'][$theparent] == 'root') {
                         break;
@@ -4057,13 +4091,14 @@ function smd_related_tags($atts, $thing='') {
         }
 
         // Forward lookup to find children of parent
-        if ($bidir==2 || $bidir==3) {
+        if ($bidir == 2 || $bidir == 3) {
             foreach ($matches as $matchit) {
                 if (array_key_exists($matchit, $smd_tags_pc[$type]['chilist'])) {
                     $children = array_merge($children, $smd_tags_pc[$type]['chilist'][$matchit]);
                 }
             }
         }
+
         $matches = array_unique(array_merge( $matches, $parents, $children ));
     }
 
@@ -4092,6 +4127,7 @@ function smd_related_tags($atts, $thing='') {
             if ($rs) {
                 trace_add('[smd_related_tags article records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+
                 foreach ($rs as $row) {
                     if (!in_array($row['ID'], $uniqrs)) {
                         $safe = ($thisarticle) ? $thisarticle : NULL;
@@ -4115,6 +4151,7 @@ function smd_related_tags($atts, $thing='') {
             if ($rs) {
                 trace_add('[smd_related_tags image records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+
                 foreach ($rs as $row) {
                     if (!in_array($row['id'], $uniqrs)) {
                         $safe = ($thisimage) ? $thisimage : NULL;
@@ -4137,6 +4174,7 @@ function smd_related_tags($atts, $thing='') {
             if ($rs) {
                 trace_add('[smd_related_tags file records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+
                 foreach ($rs as $row) {
                     if (!in_array($row['id'], $uniqrs)) {
                         $safe = ($thisfile) ? $thisfile : NULL;
@@ -4159,6 +4197,7 @@ function smd_related_tags($atts, $thing='') {
             if ($rs) {
                 trace_add('[smd_related_tags link records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+
                 foreach ($rs as $row) {
                     if (!in_array($row['id'], $uniqrs)) {
                         $safe = ($thislink) ? $thislink : NULL;
@@ -4184,12 +4223,14 @@ function smd_related_tags($atts, $thing='') {
     if ($out) {
         return doLabel($label, $labeltag).doWrap($out, $wraptag, $break, $class);
     }
+
     return '';
 }
 
 // ------------------------
 // List tags from current context, or given type
-function smd_tag_list($atts, $thing='') {
+function smd_tag_list($atts = array(), $thing = null)
+{
     global $smd_tags, $smd_thistag;
     static $smd_tags_tree = array();
     static $smd_tags_count = array();
@@ -4223,7 +4264,7 @@ function smd_tag_list($atts, $thing='') {
         'class'        => __FUNCTION__,
         'active_class' => '', // TODO
         'breakclass'   => '',
-    ),$atts));
+    ), $atts));
 
     // Validate client side atts
     $validTypes = array('article','image','file','link');
@@ -4244,10 +4285,12 @@ function smd_tag_list($atts, $thing='') {
         $where[] = $name;
         $ids = ''; // name trumps id; TODO: maybe offer a way of combining them?
     }
+
     if ($ids) {
         $ids = "id IN (" .join(',', quote_list($ids)). ")";
         $where[] = $ids;
     }
+
     if ($exclude) {
         $exclude = "name NOT IN (" .join(',', quote_list(do_list($exclude))). ")";
         $where[] = $exclude;
@@ -4266,6 +4309,7 @@ function smd_tag_list($atts, $thing='') {
 
     $where = join(' AND ', $where);
     $oper = '';
+
     if (!$where && isset($smd_tags[$type])) {
         // Use URL tags
         if ($showall) {
@@ -4289,6 +4333,7 @@ function smd_tag_list($atts, $thing='') {
         } else {
             $where = ($where) ? $where : '1=1';
         }
+
         if ($where) {
             trace_add('[smd_tag_list query: ' . $where . ']');
         }
@@ -4298,6 +4343,7 @@ function smd_tag_list($atts, $thing='') {
                 $rs = $smd_tags_tree[$type][$guid]['all'];
             } else {
                 $windex = md5($gopts.$where);
+
                 if (isset($smd_tags_tree[$type][$windex])) {
                     $rs = $smd_tags_tree[$type][$windex];
                 } else {
@@ -4308,12 +4354,14 @@ function smd_tag_list($atts, $thing='') {
 
         $sublevel = ($parent && $sublevel=='') ? ((smd_tag_tree_search($parent, $rs, 1)) ? '>=1' : '>=0') : $sublevel;
         preg_match('/([=<>]+)?([\d]+|all)/', $sublevel, $matches);
-        if($matches) {
+
+        if ($matches) {
             $oper = ($matches[1] && in_list($matches[1], '>, <, >=, <=')) ? $matches[1] : '==';
             $sublevel=$matches[2];
         } else {
             $oper = '==';
         }
+
         trace_add('[smd_tag_list sublevel | operator | matches: ' . $sublevel . '|' . $oper . '|' . join(', ', $matches) . ']');
     }
 
@@ -4322,8 +4370,8 @@ function smd_tag_list($atts, $thing='') {
     if ($rs) {
         $out = array();
         $totals = array();
-
         $outsub = array();
+
         while (list($key, $row) = each($rs)) {
             // Only add the row if one of:
             // 1) showall is on
@@ -4334,27 +4382,31 @@ function smd_tag_list($atts, $thing='') {
                 $outsub[] = $row;
             }
         }
+
         $rs = $outsub;
         trace_add('[smd_tag_list sublevel records: ' . print_r($rs, true) . ']');
 
         if ($shuffle) {
             shuffle($rs);
-        } else if ($sort) {
+        } elseif ($sort) {
             $sortPrefix = "SORT_";
             $sortOrder = array();
             $sort = do_list($sort);
             $nsrt = count($sort);
+
             for ($idx = 0; $idx < $nsrt; $idx++) {
                 $sort_dir = explode(' ', $sort[$idx]);
+
                 if (count($sort_dir) <= 1) {
                     $sort_dir[1] = "asc";
                 }
+
                 $direction = ($sort_dir[1] == "desc") ? $sortPrefix.'DESC' : $sortPrefix.'ASC';
                 $sortOrder[] = array("col" => $sort_dir[0], "sort" => $direction);
             }
 
             // Translate the rows into columns that can be sorted
-            foreach($rs as $key => $row) {
+            foreach ($rs as $key => $row) {
                 foreach ($row as $identifier => $item) {
                     $varname = "col_".$identifier;
                     ${$varname}[$key] = $item;
@@ -4367,6 +4419,7 @@ function smd_tag_list($atts, $thing='') {
                 $sortargs[] = '$col_'.$sortOrder[$idx]['col'];
                 $sortargs[] = $sortOrder[$idx]['sort'];
             }
+
             $sortit = 'array_multisort('.join(", ",$sortargs).', $rs);';
             eval($sortit);
         }
@@ -4378,22 +4431,26 @@ function smd_tag_list($atts, $thing='') {
         // Cache the relevant info from the tag usage table
         if (!isset($smd_tags_count[$type])) {
             $taguse = safe_rows('tag_id, count(*) AS tally', SMD_TAGU, "type='" . doSlash($type) . "' GROUP BY tag_id");
+
             foreach ($taguse as $tagblob) {
                 $smd_tags_count[$type][$tagblob['tag_id']] = $tagblob['tally'];
-          }
+            }
         }
 
         // Set up the cloud weighting if desired
         $flavour = do_list($flavour, ':');
+
         if ($flavour[0] == 'cloud') {
             $minPercent = (isset($flavour[1]) && !empty($flavour[1])) ? $flavour[1] : 100;
             $maxPercent = (isset($flavour[2]) && !empty($flavour[2])) ? $flavour[2] : 200;
             $max = 1; $min = 99999; $count = 0;
+
             foreach ($rs as $row) {
                 $count = (isset($smd_tags_count[$type][$row['id']])) ? $smd_tags_count[$type][$row['id']] : 0;
                 $max = ($count > $max ? $count : $max);
                 $min = ($min > $count ? $count : $min);
             }
+
             $multiplier = ($max > $min) ? ($maxPercent - $minPercent) / ($max - $min) : 1;
         }
 
@@ -4408,14 +4465,20 @@ function smd_tag_list($atts, $thing='') {
         foreach ($rs as $idx => $row) {
             $index = $idx; // Because we can muck about with this value without affecting the loop counter
 
-            if (($flavour[0] == 'head') && ($row['name'] != $tag_head)) continue;
-            if (($flavour[0] == 'tail') && ($row['name'] != $tag_tail)) continue;
+            if (($flavour[0] == 'head') && ($row['name'] != $tag_head)) {
+                continue;
+            }
+
+            if (($flavour[0] == 'tail') && ($row['name'] != $tag_tail)) {
+                continue;
+            }
+
             $row['type'] = $type;
             $row['count'] = (isset($smd_tags_count[$type][$row['id']])) ? $smd_tags_count[$type][$row['id']] : 0;
             $row['indent'] = str_repeat($indent, $row['level'] * 1);
             $row['weight'] = ($flavour[0] == 'cloud') ? floor($minPercent + (($max - ( $max - ($row['count'] - $min))) * $multiplier)) : 1;
 
-            if ( ($flavour[0] == 'crumb') && (($pos = array_search($row['name'], $tag_list)) !== false) ) {
+            if (($flavour[0] == 'crumb') && (($pos = array_search($row['name'], $tag_list)) !== false)) {
                 // Override the position of this entry in the list to fake a crumbtrail
                 $index = $pos;
             }
@@ -4441,6 +4504,7 @@ function smd_tag_list($atts, $thing='') {
             return doLabel($label, $labeltag).doWrap($out, $wraptag, $break, $class, $breakclass);
         }
     }
+
     return '';
 }
 
@@ -4561,35 +4625,35 @@ h3. Interface setting prefs
 ** *Up*: for any given tag assigned to an item, consider all its parent tags also implicitly assigned.
 ** *Down*: for any given tag assigned to an item, consider all its child tags also implicitly assigned.
 ** *Both*: for any given tag assigned to an item, consider all its parent and child tags also implicitly assigned.
-* *Link tags to categories*: allow tags to be associated with Txp categories. If this is on and @Text area+@ is being used, any new tags added via the article, image, file or link screens will be associated with the currently selected category (or category1 in the case of articles)
-* *Permit parent tag selection*: if set to 'yes', the parent tags assigned to the chosen categories are selecteable as tags. Set to 'no' if your tag hierarchy is such that the parent tag is just a placeholder or "group leader" with no intrinsic value other than as a parent for a bunch of child tags
-* *Master parent tag*: the name of a tag that you designate as the 'master' tag. Assigning any tags beneath this one will be added to any per-category tags to make up the final available tag pool
-* *Quick tag*: if using a textarea and you install the jQuery autocomplete plugin, this determines which method of auto-complete to use: @strict@ prevents tags being submitted that are disallowed by the current Txp category; @standard@ allows new tags to be entered. Note that you *may not enter new tags at all* if Quick tags is in @strict@ mode: it overrides @Text area+@
+* *Link tags to categories*: allow tags to be associated with Txp categories. If this is on and @Text area+@ is being used, any new tags added via the article, image, file or link screens will be associated with the currently selected category (or category1 in the case of articles).
+* *Permit parent tag selection*: if set to 'yes', the parent tags assigned to the chosen categories are selecteable as tags. Set to 'no' if your tag hierarchy is such that the parent tag is just a placeholder or "group leader" with no intrinsic value other than as a parent for a bunch of child tags.
+* *Master parent tag*: the name of a tag that you designate as the 'master' tag. Assigning any tags beneath this one will be added to any per-category tags to make up the final available tag pool.
+* *Quick tag*: if using a textarea and you install the jQuery autocomplete plugin, this determines which method of auto-complete to use: @strict@ prevents tags being submitted that are disallowed by the current Txp category; @standard@ allows new tags to be entered. Note that you *may not enter new tags at all* if Quick tags is in @strict@ mode: it overrides @Text area+@.
 * *js plugin dir*: the directory in which your auto-complete plugin resides (the filename it expects is @jquery.autocomplete.pack.js@). If you begin the directory name with a @/@ the path will be relative to your site root. Without a preceding '/' it is relative to the 'textpattern' directory. The trailing slash is optional and will be added internally if you omit it. This gives you the freedom to put the files wherever it suits you and reference them like this:
 ** use @my_js@ for 'textpattern/my_js/jquery.autocomplete.pack.js'
 ** use either @../my_scripts@  or @/my_scripts@ for 'site_root/my_scripts/jquery.autocomplete.pack.js'
-* *js style dir*: the directory in which your auto-complete CSS files reside (the file name it expects is @jquery.autocomplete.css@). The same comments hold true about the path as above
-* *Select/textarea rows*: number of rows in the select list or textarea. If set to @1@ a select list will become non-multiple and you can then only choose 1 tag. Set to @0@ to show a multiple select list containing all tags. Other values show a multiple select list with the given number of rows but be aware this may turn out to be a guide as certain browser factors may override the value. For example, in Firefox if you choose a select list value of @2@ you cannot see the whole list because the input is not big enough to show the scrollbar (you get a scrollbar from a value of @3@ or more). Also, if you are using autocomplete for the text area you may not get the number of rows you expect due to the CSS that comes with the autocomplete plugin
+* *js style dir*: the directory in which your auto-complete CSS files reside (the file name it expects is @jquery.autocomplete.css@). The same comments hold true about the path as above.
+* *Select/textarea rows*: number of rows in the select list or textarea. If set to @1@ a select list will become non-multiple and you can then only choose 1 tag. Set to @0@ to show a multiple select list containing all tags. Other values show a multiple select list with the given number of rows but be aware this may turn out to be a guide as certain browser factors may override the value. For example, in Firefox if you choose a select list value of @2@ you cannot see the whole list because the input is not big enough to show the scrollbar (you get a scrollbar from a value of @3@ or more). Also, if you are using autocomplete for the text area you may not get the number of rows you expect due to the CSS that comes with the autocomplete plugin.
 
 h3. Tag management prefs
 
 * *Initial pane*: when you click _Extensions -> Tags (smd)_, show either the preferences page or the tag management page.
 * *Auto name*: helps speed tag creation by automatically naming them based on the title you use.
 * *Tag layout*: can be either:
-** the number of columns of tags to display in the management page. This creates a table
-** the word @list@ to show them as an unordered list. If you specify @list:N@ then the list will be split every 'N' tags and start a new row/column (depending on your setting of _Order tags by_)
-** the word @group@ to start a new row or column each time a new top-level tag is encountered. Useful for heavily nested or hierarchical tags
+** the number of columns of tags to display in the management page. This creates a table.
+** the word @list@ to show them as an unordered list. If you specify @list:N@ then the list will be split every 'N' tags and start a new row/column (depending on your setting of _Order tags by_).
+** the word @group@ to start a new row or column each time a new top-level tag is encountered. Useful for heavily nested or hierarchical tags.
 * *Order tags by*: 'column' to have the tags work down the page first; 'row' to work across the page.
 * *Show tag usage counts*: whether to indicate the number of items for which a tag is used.
 * *When deleting a parent*: choose whether any child tags will be promoted to the same level as the tag you just deleted, or the entire tree below the deleted tag will be removed as well.
 * *Allow deletion of used tags*: when set to 'no', if a tag has been used by an article/image/file/link it cannot be deleted.
 * *Textile description*: allow Textile to be used in tag descriptions.
-* *Show description as tooltip*: when on a content panel and you have elected to use Select List or Text List input modes, this setting tells the plugin to popup a tooltip of the description as you hover over a tag
-* *Automatically display reports*: after operations that affect multiple tags, a report listing the alterations is available. If set to 'yes' this report is popped up for you to read immediately after the operation. If set to 'no' you can view the report by clicking the _Display recent report_ link in the Tag Search box
+* *Show description as tooltip*: when on a content panel and you have elected to use Select List or Text List input modes, this setting tells the plugin to popup a tooltip of the description as you hover over a tag.
+* *Automatically display reports*: after operations that affect multiple tags, a report listing the alterations is available. If set to 'yes' this report is popped up for you to read immediately after the operation. If set to 'no' you can view the report by clicking the _Display recent report_ link in the Tag Search box.
 * *Clicked RGB colour*: the CSS background colour for the currently edited tag.
 * *Mouse-over RGB colour*: the CSS background colour as you move over each item in the list.
-* *Sub-tag level indicator*: the HTML entity or text you wish to precede each sub-tag with. Level 1 tags have one of these symbols added, level 2 tags have two added, and so on
-* *Multi-tag delimiter*: allows you to specify more than one tag at a time during creation. If you enter more than one character here, only the first will be used. To disable this feature, empty the box contents
+* *Sub-tag level indicator*: the HTML entity or text you wish to precede each sub-tag with. Level 1 tags have one of these symbols added, level 2 tags have two added, and so on.
+* *Multi-tag delimiter*: allows you to specify more than one tag at a time during creation. If you enter more than one character here, only the first will be used. To disable this feature, empty the box contents.
 * *Description width, height*: width and height (comma-separated, in pixels) of the description textarea input field.
 
 h3. URL management prefs
@@ -4599,7 +4663,7 @@ h3. URL management prefs
 * *OR combinator char*: The character to use between tags when you want to find smd_related_tags that match ANY of the tags in the URL. Default: @|@.
 * *URL name parameter*: When filtering by tag name, this is the URL string used to indicate a tag.
 * *URL type parameter*: When filtering by tag type, this is the URL string used to indicate a tag type.
-* *Trigger(s) for tag lists*: A comma-separated list of trigger words, or Txp Sections which are valid tag landing pages[1]. Any automatically generated links from the public-side tags will be sent to the _first_ section in the list for display. Can be overridden on a tag-by-tag basis with the @section_link@ attribute
+* *Trigger(s) for tag lists*: A comma-separated list of trigger words, or Txp Sections which are valid tag landing pages[1]. Any automatically generated links from the public-side tags will be sent to the _first_ section in the list for display. Can be overridden on a tag-by-tag basis with the @section_link@ attribute.
 
 fn1. If using this feature for Sections, they must exist in your Txp Sections tab, unless you are using some gbp_permanent_links magic. Note that URLs can be any of the following formats:
 
@@ -4629,8 +4693,8 @@ The input row at the top has four or five fields in it, depending if you have ch
 * *Title*: The display name of the tag on the public site.
 * *Description*: A description to explain the tag's purpose.
 * *Parent*: Whether the tag is in a sub-category. The empty item is considered 'root' (top level).
-* *Linked cat*: (optional) Whether the tag is associated with a Txp category. Any sub-tags are automatically assigned to the chosen category as well
-* *Name*: The 'internal' Txp tag name. Probably shouldn't contain spaces or weird characters, although you can put them in if you know what you're doing
+* *Linked cat*: (optional) Whether the tag is associated with a Txp category. Any sub-tags are automatically assigned to the chosen category as well.
+* *Name*: The 'internal' Txp tag name. Probably shouldn't contain spaces or weird characters, although you can put them in if you know what you're doing.
 
 With the auto-name feature enabled, whatever you type in the Title field will be mimicked in the Name field, but with only lower case alphanumeric characters. Spaces will be converted to dashes. Note that at present, foreign characters are not 'dumbed down' to ASCII. This feature is planned but for the time being it is probably best to switch off the auto-name feature if you are dealing heavily with unicode characters. Your tags will still be dumbed down according to Txp's internal rules exactly like they are on the Categories panel; you just won't be able to see its name until you click to highlight it.
 
@@ -4644,11 +4708,11 @@ If the option to display counts is selected the number of articles / images / fi
 
 Notes:
 
-* If you Edit a tag and try to Save it when it has the same name as an existing tag, you will receive a warning message
-* If you try to delete a tag that is in use and the preference 'Allow deletion of used tags' is set to 'no', it will be forbidden
-* The parent list is populated via AJAX from the database each time you click a tag, and the Linked cat list is populated each time you change type. This is unfortunately unavoidable. The lists will fade out while the request is taking place. Occasionally it may get "stuck" if you click too quickly between tags or the server is slow to respond. In these circumstances, refreshing the page by clicking the _smd_tags_ tab will restore things
-* When using the auto-tag feature, if you want to change the Name field, do it _after_ you have finished typing in the Title field; any subsequent changes to the Title field will overwrite anything in the Name field
-* Deleting a tag will remove all references to it, so be careful
+* If you Edit a tag and try to Save it when it has the same name as an existing tag, you will receive a warning message.
+* If you try to delete a tag that is in use and the preference 'Allow deletion of used tags' is set to 'no', it will be forbidden.
+* The parent list is populated via AJAX from the database each time you click a tag, and the Linked cat list is populated each time you change type. This is unfortunately unavoidable. The lists will fade out while the request is taking place. Occasionally it may get "stuck" if you click too quickly between tags or the server is slow to respond. In these circumstances, refreshing the page by clicking the _smd_tags_ tab will restore things.
+* When using the auto-tag feature, if you want to change the Name field, do it _after_ you have finished typing in the Title field; any subsequent changes to the Title field will overwrite anything in the Name field.
+* Deleting a tag will remove all references to it, so be careful.
 
 h3. Live tag search
 
@@ -4658,9 +4722,9 @@ When you flick between tag types your search criteria remain in force. Hit the _
 
 Notes:
 
-* searches are case insensitive
-* multi-word searches find tags with _any_ of the matching words. This allows you to build up complex searches using many words and apply actions to them all
-* linked categories and tag names/parents are escaped so they will not contain any non-ASCII or special characters. For example, if your tag title is _Paul O'Grady_ you can search its title for _O'Gr_ and it will locate the tag. If, however, you wanted to find all tags that have _Paul O'Grady_ as their parent tag you'd have to type _ogra_ to have it filter by this parameter
+* Searches are case insensitive.
+* Multi-word searches find tags with _any_ of the matching words. This allows you to build up complex searches using many words and apply actions to them all.
+* Linked categories and tag names/parents are escaped so they will not contain any non-ASCII or special characters. For example, if your tag title is _Paul O'Grady_ you can search its title for _O'Gr_ and it will locate the tag. If, however, you wanted to find all tags that have _Paul O'Grady_ as their parent tag you'd have to type _ogra_ to have it filter by this parameter.
 
 h3. Performing actions on filtered tags
 
@@ -4670,10 +4734,10 @@ Choosing to _Assign parent_ or _Link to category_ presents a further dropdown. S
 
 Things to note:
 
-* if you try to assign a parent to a tag that is itself, it will be safely ignored
-* if the _Automatically show reports_ preference is on, the result of the action will be popped up immediately upon completion
-* if you leave the search box empty, any multi-action you choose will be applied to ALL tags
-* you can view the most recent report at any time by clicking the _Display recent report_ link in the _Tag search_ box, but once you have navigated away from the Manage Tags panel, or performed another action such as creating a tag, the report is refreshed/lost
+* If you try to assign a parent to a tag that is itself, it will be safely ignored.
+* If the _Automatically show reports_ preference is on, the result of the action will be popped up immediately upon completion.
+* If you leave the search box empty, any multi-action you choose will be applied to ALL tags.
+* You can view the most recent report at any time by clicking the _Display recent report_ link in the _Tag search_ box, but once you have navigated away from the Manage Tags panel, or performed another action such as creating a tag, the report is refreshed/lost.
 
 h2(#import). Importing tags en-masse
 
@@ -4692,10 +4756,10 @@ h3. Source options
 
 h3. Import options
 
-* *Link to category*: if you permit tags to be linked to category, this dropdown is available. All imported keywords/categories will be linked to this Txp category
-* *Force category link if tag already exists*: if checked, any tags that have already been imported will have their category re-assigned to the chosen category. If not checked, any tag that already exists will have its category left intact
-* *Assign to parent tag*: Link all imported keywords/categories beneath this smd_tag. If you are linking tags to categories then the available parent tags will be influenced by the setting of the category chosen above
-* *Force parent if tag already exists*: if checked, any tags that have already been imported will have their parent re-assigned to the chosen smd_tag. If not checked, any tag that already exists will have its tag hierarchy left intact
+* *Link to category*: if you permit tags to be linked to category, this dropdown is available. All imported keywords/categories will be linked to this Txp category.
+* *Force category link if tag already exists*: if checked, any tags that have already been imported will have their category re-assigned to the chosen category. If not checked, any tag that already exists will have its category left intact.
+* *Assign to parent tag*: Link all imported keywords/categories beneath this smd_tag. If you are linking tags to categories then the available parent tags will be influenced by the setting of the category chosen above.
+* *Force parent if tag already exists*: if checked, any tags that have already been imported will have their parent re-assigned to the chosen smd_tag. If not checked, any tag that already exists will have its tag hierarchy left intact.
 
 Once you have chosen the relevant options, hit _Go_. The plugin will do your bidding and:
 
@@ -4716,11 +4780,11 @@ The @[Edit]@ link takes you to the Tag Management page that allows you to create
 
 Notes on the Text area entry mechanisms:
 
-* Tags are case sensitive. Auto-complete is strongly recommended
-* New tags can _only_ be added if the @Text area+@ input method is chosen and Quick tag is *not* strict
-* New tags are normally assigned at the root level; if you wish to sub-tag them at this point, write the tag like this: @parent_tag-->new_tag@. Anything to the left of the hyphen-hyphen-arrow is first checked to see if it exists as a tag and, if it does, the new_tag is made a sub-tag of it. If the parent_tag doesn't exist, new_tag is assigned to root
-* New tags become Tag Titles. Corresponding tag names are subject to the usual lower case/dumbing down
-* If @Link tags to categories@ is set, only valid tags assigned to the chosen categories will be saved
+* Tags are case sensitive. Auto-complete is strongly recommended.
+* New tags can _only_ be added if the @Text area+@ input method is chosen and Quick tag is *not* strict.
+* New tags are normally assigned at the root level; if you wish to sub-tag them at this point, write the tag like this: @parent_tag-->new_tag@. Anything to the left of the hyphen-hyphen-arrow is first checked to see if it exists as a tag and, if it does, the new_tag is made a sub-tag of it. If the parent_tag doesn't exist, new_tag is assigned to root.
+* New tags become Tag Titles. Corresponding tag names are subject to the usual lower case/dumbing down.
+* If @Link tags to categories@ is set, only valid tags assigned to the chosen categories will be saved.
 * If you alter category your tag list is rebuilt to only show / allow the ones in the selected category(ies). If you have already selected some tags, this will result in the ones you have selected since last save being removed/unhighlighted. So choose your categories first and then tag away.
 
 h2(tag). Tag: @<txp:smd_tag_list>@
@@ -4748,7 +4812,7 @@ Display a list of tags matching certain criteria, from the current context (URL,
 ; *name*
 : Fixed list of tag names to show. If used, they trump the @id@.
 ; *exclude*
-: List of tag names you wish to omit from the list
+: List of tag names you wish to omit from the list.
 ; *parent*
 : Start the list from this parent tag.
 : Default: unset (i.e. the 'root' node of this particular type)
@@ -4769,7 +4833,7 @@ Display a list of tags matching certain criteria, from the current context (URL,
 :: 1: show all tags, even empty ones. Useful for generating hierarchical tag trees
 : Default: 0
 ; *offset*
-: Skip over this number of tags before starting to display them
+: Skip over this number of tags before starting to display them.
 ; *limit*
 : The maximum number of tags to show.
 : Default: 99999 (i.e. effectively unlimited)
@@ -4941,21 +5005,21 @@ Rudimentary conditional to check a tag for certain parameters and execute the co
 :: @file@
 :: @link@
 ; *id*
-: Checks if the tag ID matches the one given
+: Checks if the tag ID matches the one given.
 ; *name*
-: Checks if the tag name matches the one given
+: Checks if the tag name matches the one given.
 ; *title*
-: Checks if the tag title matches the one given
+: Checks if the tag title matches the one given.
 ; *description*
-: Checks if the tag description matches the one given
+: Checks if the tag description matches the one given.
 ; *parent*
-: Checks if the tag parent matches the one given
+: Checks if the tag parent matches the one given.
 ; *count*
-: Checks if the tag count matches the number given
+: Checks if the tag count matches the number given.
 ; *children*
-: Checks if the number of children the tag has matches the number given
+: Checks if the number of children the tag has matches the number given.
 ; *level*
-: Checks if the tag is at a specific level in the hierarchy
+: Checks if the tag is at a specific level in the hierarchy.
 ; *is*
 : Checks if the tag is of a particular variety. Choose from:
 :: @master@ : one of the master tags
@@ -4964,11 +5028,11 @@ Rudimentary conditional to check a tag for certain parameters and execute the co
 
 Each of the items (except @is@) may take an exact value/string to match or a modified syntax: you may precede the value with one of the following symbols to perform a mathematical/boolean comparison:
 
-* @<@ : less than
-* @<=@ : less than or equal to
-* @>@ : greater than
-* @>=@ : greater than or equal to
-* @!@ : not equal to
+* @<@ : less than.
+* @<=@ : less than or equal to.
+* @>@ : greater than.
+* @>=@ : greater than or equal to.
+* @!@ : not equal to.
 
 For example:
 
@@ -5014,7 +5078,7 @@ Use the following attributes to customise the tag:
 :: 1: on
 : Default: 0
 ; *form*
-: Pass control to the given form for rendering the tag output. Can also be used as a container. If you don't specify either a @form@ or a container, it outputs some sensible default based on the current context (i.e. the permlinked article title in the @article@ context, the file download link in the @file@ context, etc)
+: Pass control to the given form for rendering the tag output. Can also be used as a container. If you don't specify either a @form@ or a container, it outputs some sensible default based on the current context (i.e. the permlinked article title in the @article@ context, the file download link in the @file@ context, etc).
 ; *section*
 : %(important)Only of use for articles%. Limits the search to articles in a particular section.
 : Default: current section, but check the caveats below for a side-effect of this attribute
@@ -5030,7 +5094,7 @@ Use the following attributes to customise the tag:
 : Reorder the items by some field.
 : Default: @Posted desc@ for articles / @date desc@ for everything else
 ; *label*
-: Display this label at the top of the list of items
+: Display this label at the top of the list of items.
 ; *labeltag*
 : Wrap this HTML tag around the label.
 ; *wraptag*
@@ -5115,6 +5179,18 @@ bc. <txp:smd_tag_list showall="1" sort="name asc"
 </txp:smd_tag_list>
 
 Just take out the @flavour@ and @style@ attributes to render a regular alphabetic tag listing. Note that you could use @lettertitle@ but you would get both lower- and upper-case 'd' sections if you had tags 'Dastardly' and 'deviant'.
+
+h2(known-issues). Known issues
+
+Issue: Under Txp 4.6.x, the 'More...' link and the preference panel groups don't open/close. A JS error is thrown.
+Cause: Bug in Textpattern's @textpattern.js@ file.
+Fix: Edit the line that reads:
+
+bc. if (selectedTab === undefined) {
+
+and change it to:
+
+bc. if (typeof selectedTab === 'undefined') {
 
 h2(author). Author
 
