@@ -4526,79 +4526,80 @@ To do (possibly):
 
 h2(install). Installation / Uninstallation
 
-p(important). Requires Textpattern 4.5.0+.
+p(important). Requires Textpattern 4.6.2+.
 
-p(important). If upgrading from v0.20 or earlier: delete smd_tags_client and smd_tags_admin plugins first, then install and activate this plugin. Your prefs and tags will be retained.
+p(important). If upgrading from plugin v0.20 or earlier: delete smd_tags_client and smd_tags_admin plugins first, then install and activate this plugin. Your prefs and tags will be retained.
 
-Download the plugin from either "textpattern.org":http://textpattern.org/plugins/1026/smd_tags or the "software page":http://stefdawson.com/sw. Paste into the Txp __Admin->Plugins__ panel, install and enable the plugin.
+Download the plugin from either "GitHub":https://github.com/Bloke/smd_tags/releases or the "software page":https://stefdawson.com/sw. Paste into the Txp _Admin->Plugins_ panel, install and enable the plugin.
 
-Visit the __Extensions->smd_tags_ panel. If it has not already been done automatically for you, click the Install tables button. The necessary tables and preferences will be installed. From this page you can Install, Delete and Save the plugin preferences or remove the plugin's tables to empty your tags entirely and start again.
+Visit the _Extensions->Tags (smd)_ panel. If it has not already been done automatically for you, click the Install tables/Install prefs buttons. The necessary tables and preferences will be installed. From this page you can Install, Delete and Save the plugin preferences or remove the plugin's tables to empty your tags entirely and start again.
 
-To completely remove smd_tags, visit the _smd_tags Preferences_ page, hit 'Remove tables' to remove the preferences and tag tables from the database, then simply delete the plugin as normal from the _Admin->Plugins_ page.
+To completely remove smd_tags, visit the _Tag Preferences_ page, hit 'Remove tables' to remove the preferences and tag tables from the database, then simply delete the plugin as normal from the _Admin->Plugins_ page.
 
 Visit the "forum thread":http://forum.textpattern.com/viewtopic.php?id=28621 for more info and to report the success (or otherwise) of this plugin.
 
 h2. Admin-side buttons
 
-* %(atnm)Manage tags% : Switch to the "tag management page":#manage.
-* %(atnm)Preferences% : Switch to the "preferences page":#prefs.
-* %(atnm)Import tags% : "Import tags":#import from tru_tags, rss_unlimited_categories or Txp categories/custom fields.
-* %(atnm)Remove prefs &#8224;% : Delete the preferences only; useful if your prefs have become corrupted or you simply want to return to "default" operation.
-* %(atnm)Remove tables &#8224;% : Delete the tags tables. This will permanently erase all tags against all articles, images, files and links. Be very sure you mean it before clicking this!
-* %(atnm)Rebuild tags &#8224;% : If your tag table is corrupt you *may* be able to fix it with this option. However, if it is badly damaged you may just get a white screen of death. If that is the case, your options are then to either fix it by hand or delete the bad entries, rebuild the table with the remaining items and then repopulate the tags.
+* *Manage tags*: Switch to the "tag management page":#manage
+* *Preferences*: Switch to the "preferences page":#prefs
+* *Import tags*: "Import tags":#import from tru_tags, rss_unlimited_categories or Txp categories/custom fields
+* *Install prefs &#8224;*: Install the plugin preferences; useful if your have upgraded or wish to resync missing prefs. Any existing preference values will be retained.
+* *Remove prefs &#8224;*: Delete the plugin preferences; useful if your prefs have become corrupted or you simply want to return to "default" operation.
+* *Remove tables &#8224;*: Delete the tags tables. This will permanently erase all tags against all articles, images, files and links. Be very sure you mean it before clicking this!
+* *Rebuild tags &#8224;*: If your tag table is corrupt you *may* be able to fix it with this option. However, if it is badly damaged you may just get a white screen of death. If that is the case, your options are then to either fix it by hand or delete the bad entries, rebuild the table with the remaining items and then repopulate the tags.
 
-&#8224; hold down _Shift_ when refreshing the Prefs panel until it has fully loaded to enable these options: you have to be quick!
+&#8224; Use the *More...* link to reveal these items.
 
 h2(#prefs). The preferences
 
 h3. Interface setting prefs
 
-* %(atnm)Enable tags in% : a tag entry mechanism is added to the admin side of each of the checked pages
-* %(atnm)Enter tags using% : the mechanism you wish to use to assign tags. @Text area+@ allows new tags to be added on the fly via contributors (a bit like tru_tags)
-* %(atnm)Bi-directional tag trees% : when you assign a tag to an item, any time you display related items by tag, only exact matching items are returned. If you organise your tags in hierarchical trees, you may wish to have parent or child tags automatically considered. Choose from:
-** *No*: Only exact tag matches are considered when returning related content
-** *Up*: for any given tag assigned to an item, consider all its parent tags also implicitly assigned
-** *Down*: for any given tag assigned to an item, consider all its child tags also implicitly assigned
-** *Both*: for any given tag assigned to an item, consider all its parent and child tags also implicitly assigned
-* %(atnm)Link tags to categories% : allow tags to be associated with Txp categories. If this is on and @Text area+@ is being used, any new tags added via the article, image, file or link screens will be associated with the currently selected category (or category1 in the case of articles)
-* %(atnm)Permit parent tag selection% : if set to 'yes', the parent tags assigned to the chosen categories are selecteable as tags. Set to 'no' if your tag hierarchy is such that the parent tag is just a placeholder or "group leader" with no intrinsic value other than as a parent for a bunch of child tags
-* %(atnm)Master parent tag% : the name of a tag that you designate as the 'master' tag. Assigning any tags beneath this one will be added to any per-category tags to make up the final available tag pool
-* %(atnm)Quick tag% : if using a textarea and you install the jQuery autocomplete plugin, this determines which method of auto-complete to use: @strict@ prevents tags being submitted that are disallowed by the current Txp category; @standard@ allows new tags to be entered. Note that you *may not enter new tags at all* if Quick tags is in @strict@ mode: it overrides @Text area+@
-* %(atnm)js plugin dir% : the directory in which your auto-complete plugin resides (the filename it expects is @jquery.autocomplete.pack.js@). If you begin the directory name with a @/@ the path will be relative to your site root. Without a preceding '/' it is relative to the 'textpattern' directory. The trailing slash is optional and will be added internally if you omit it. This gives you the freedom to put the files wherever it suits you and reference them like this:
+* *Enable tags in*: a tag entry mechanism is added to the admin side of each of the checked pages.
+* *Enter tags using*: the mechanism you wish to use to assign tags. @Text area+@ allows new tags to be added on the fly via contributors (a bit like tru_tags).
+* *Bi-directional tag trees*: when you assign a tag to an item, any time you display related items by tag, only exact matching items are returned. If you organise your tags in hierarchical trees, you may wish to have parent or child tags automatically considered. Choose from:
+** *No*: Only exact tag matches are considered when returning related content.
+** *Up*: for any given tag assigned to an item, consider all its parent tags also implicitly assigned.
+** *Down*: for any given tag assigned to an item, consider all its child tags also implicitly assigned.
+** *Both*: for any given tag assigned to an item, consider all its parent and child tags also implicitly assigned.
+* *Link tags to categories*: allow tags to be associated with Txp categories. If this is on and @Text area+@ is being used, any new tags added via the article, image, file or link screens will be associated with the currently selected category (or category1 in the case of articles)
+* *Permit parent tag selection*: if set to 'yes', the parent tags assigned to the chosen categories are selecteable as tags. Set to 'no' if your tag hierarchy is such that the parent tag is just a placeholder or "group leader" with no intrinsic value other than as a parent for a bunch of child tags
+* *Master parent tag*: the name of a tag that you designate as the 'master' tag. Assigning any tags beneath this one will be added to any per-category tags to make up the final available tag pool
+* *Quick tag*: if using a textarea and you install the jQuery autocomplete plugin, this determines which method of auto-complete to use: @strict@ prevents tags being submitted that are disallowed by the current Txp category; @standard@ allows new tags to be entered. Note that you *may not enter new tags at all* if Quick tags is in @strict@ mode: it overrides @Text area+@
+* *js plugin dir*: the directory in which your auto-complete plugin resides (the filename it expects is @jquery.autocomplete.pack.js@). If you begin the directory name with a @/@ the path will be relative to your site root. Without a preceding '/' it is relative to the 'textpattern' directory. The trailing slash is optional and will be added internally if you omit it. This gives you the freedom to put the files wherever it suits you and reference them like this:
 ** use @my_js@ for 'textpattern/my_js/jquery.autocomplete.pack.js'
 ** use either @../my_scripts@  or @/my_scripts@ for 'site_root/my_scripts/jquery.autocomplete.pack.js'
-* %(atnm)js style dir% : the directory in which your auto-complete CSS files reside (the file name it expects is @jquery.autocomplete.css@). The same comments hold true about the path as above
-* %(atnm)Select/textarea rows% : number of rows in the select list or textarea. If set to @1@ a select list will become non-multiple and you can then only choose 1 tag. Set to @0@ to show a multiple select list containing all tags. Other values show a multiple select list with the given number of rows but be aware this may turn out to be a guide as certain browser factors may override the value. For example, in Firefox if you choose a select list value of @2@ you cannot see the whole list because the input is not big enough to show the scrollbar (you get a scrollbar from a value of @3@ or more). Also, if you are using autocomplete for the text area you may not get the number of rows you expect due to the CSS that comes with the autocomplete plugin
+* *js style dir*: the directory in which your auto-complete CSS files reside (the file name it expects is @jquery.autocomplete.css@). The same comments hold true about the path as above
+* *Select/textarea rows*: number of rows in the select list or textarea. If set to @1@ a select list will become non-multiple and you can then only choose 1 tag. Set to @0@ to show a multiple select list containing all tags. Other values show a multiple select list with the given number of rows but be aware this may turn out to be a guide as certain browser factors may override the value. For example, in Firefox if you choose a select list value of @2@ you cannot see the whole list because the input is not big enough to show the scrollbar (you get a scrollbar from a value of @3@ or more). Also, if you are using autocomplete for the text area you may not get the number of rows you expect due to the CSS that comes with the autocomplete plugin
 
 h3. Tag management prefs
 
-* %(atnm)Initial pane% : when you click _Extensions -> smd_tags_, show either the preferences page or the tag management page
-* %(atnm)Auto name% : helps speed tag creation by automatically naming them based on the title you use
-* %(atnm)Tag layout% : can be either:
+* *Initial pane*: when you click _Extensions -> Tags (smd)_, show either the preferences page or the tag management page.
+* *Auto name*: helps speed tag creation by automatically naming them based on the title you use.
+* *Tag layout*: can be either:
 ** the number of columns of tags to display in the management page. This creates a table
 ** the word @list@ to show them as an unordered list. If you specify @list:N@ then the list will be split every 'N' tags and start a new row/column (depending on your setting of _Order tags by_)
 ** the word @group@ to start a new row or column each time a new top-level tag is encountered. Useful for heavily nested or hierarchical tags
-* %(atnm)Order tags by% : 'column' to have the tags work down the page first; 'row' to work across the page
-* %(atnm)Show tag usage counts% : whether to indicate the number of items for which a tag is used
-* %(atnm)When deleting a parent% : choose whether any child tags will be promoted to the same level as the tag you just deleted, or the entire tree below the deleted tag will be removed as well
-* %(atnm)Allow deletion of used tags% : when set to 'no', if a tag has been used by an article/image/file/link it cannot be deleted
-* %(atnm)Textile description% : allow Textile to be used in tag descriptions
-* %(atnm)Show description as tooltip% : when on a content panel and you have elected to use Select List or Text List input modes, this setting tells the plugin to popup a tooltip of the description as you hover over a tag
-* %(atnm)Automatically display reports% : after operations that affect multiple tags, a report listing the alterations is available. If set to 'yes' this report is popped up for you to read immediately after the operation. If set to 'no' you can view the report by clicking the _Display recent report_ link in the Tag Search box
-* %(atnm)Clicked RGB colour% : the CSS background colour for the currently edited tag
-* %(atnm)Mouse-over RGB colour% : the CSS background colour as you move over each item in the list
-* %(atnm)Sub-tag level indicator% : the HTML entity or text you wish to precede each sub-tag with. Level 1 tags have one of these symbols added, level 2 tags have two added, and so on
-* %(atnm)Multi-tag delimiter% : allows you to specify more than one tag at a time during creation. If you enter more than one character here, only the first will be used. To disable this feature, empty the box contents
-* %(atnm)Description width, height% : width and height (comma-separated, in pixels) of the description textarea input field
+* *Order tags by*: 'column' to have the tags work down the page first; 'row' to work across the page.
+* *Show tag usage counts*: whether to indicate the number of items for which a tag is used.
+* *When deleting a parent*: choose whether any child tags will be promoted to the same level as the tag you just deleted, or the entire tree below the deleted tag will be removed as well.
+* *Allow deletion of used tags*: when set to 'no', if a tag has been used by an article/image/file/link it cannot be deleted.
+* *Textile description*: allow Textile to be used in tag descriptions.
+* *Show description as tooltip*: when on a content panel and you have elected to use Select List or Text List input modes, this setting tells the plugin to popup a tooltip of the description as you hover over a tag
+* *Automatically display reports*: after operations that affect multiple tags, a report listing the alterations is available. If set to 'yes' this report is popped up for you to read immediately after the operation. If set to 'no' you can view the report by clicking the _Display recent report_ link in the Tag Search box
+* *Clicked RGB colour*: the CSS background colour for the currently edited tag.
+* *Mouse-over RGB colour*: the CSS background colour as you move over each item in the list.
+* *Sub-tag level indicator*: the HTML entity or text you wish to precede each sub-tag with. Level 1 tags have one of these symbols added, level 2 tags have two added, and so on
+* *Multi-tag delimiter*: allows you to specify more than one tag at a time during creation. If you enter more than one character here, only the first will be used. To disable this feature, empty the box contents
+* *Description width, height*: width and height (comma-separated, in pixels) of the description textarea input field.
 
 h3. URL management prefs
 
-* %(atnm)Use tag combinations% : If set to yes, you may perform multi-tag searches from the URL. If set to no, only the last tag is taken into account
-* %(atnm)AND combinator char% : The character to use between tags when you want to find smd_related_tags that match ALL the tags in the URL. Default: @+@
-* %(atnm)OR combinator char% : The character to use between tags when you want to find smd_related_tags that match ANY of the tags in the URL. Default: @|@
-* %(atnm)URL name parameter% : When filtering by tag name, this is the URL string used to indicate a tag
-* %(atnm)URL type parameter% : When filtering by tag type, this is the URL string used to indicate a tag type
-* %(atnm)Trigger(s) for tag lists% : A comma-separated list of trigger words, or Txp Sections which are valid tag landing pages[1]. Any automatically generated links from the public-side tags will be sent to the _first_ section in the list for display. Can be overridden on a tag-by-tag basis with the @section_link@ attribute
+* *Use tag combinations*: If set to yes, you may perform multi-tag searches from the URL. If set to no, only the last tag is taken into account.
+* *AND combinator char*: The character to use between tags when you want to find smd_related_tags that match ALL the tags in the URL. Default: @+@.
+* *OR combinator char*: The character to use between tags when you want to find smd_related_tags that match ANY of the tags in the URL. Default: @|@.
+* *URL name parameter*: When filtering by tag name, this is the URL string used to indicate a tag.
+* *URL type parameter*: When filtering by tag type, this is the URL string used to indicate a tag type.
+* *Trigger(s) for tag lists*: A comma-separated list of trigger words, or Txp Sections which are valid tag landing pages[1]. Any automatically generated links from the public-side tags will be sent to the _first_ section in the list for display. Can be overridden on a tag-by-tag basis with the @section_link@ attribute
 
 fn1. If using this feature for Sections, they must exist in your Txp Sections tab, unless you are using some gbp_permanent_links magic. Note that URLs can be any of the following formats:
 
@@ -4625,11 +4626,11 @@ Displays a list of all defined tags. In contrast to the built-in categories, onl
 
 The input row at the top has four or five fields in it, depending if you have chosen to link tags to categories:
 
-* %(atnm)Title% : The display name of the tag on the public site
-* %(atnm)Description% : A description to explain the tag's purpose
-* %(atnm)Parent% : Whether the tag is in a sub-category. The empty item is considered 'root' (top level)
-* %(atnm)Linked cat% : (optional) Whether the tag is associated with a Txp category. Any sub-tags are automatically assigned to the chosen category as well
-* %(atnm)Name% : The 'internal' Txp tag name. Probably shouldn't contain spaces or weird characters, although you can put them in if you know what you're doing
+* *Title*: The display name of the tag on the public site.
+* *Description*: A description to explain the tag's purpose.
+* *Parent*: Whether the tag is in a sub-category. The empty item is considered 'root' (top level).
+* *Linked cat*: (optional) Whether the tag is associated with a Txp category. Any sub-tags are automatically assigned to the chosen category as well
+* *Name*: The 'internal' Txp tag name. Probably shouldn't contain spaces or weird characters, although you can put them in if you know what you're doing
 
 With the auto-name feature enabled, whatever you type in the Title field will be mimicked in the Name field, but with only lower case alphanumeric characters. Spaces will be converted to dashes. Note that at present, foreign characters are not 'dumbed down' to ASCII. This feature is planned but for the time being it is probably best to switch off the auto-name feature if you are dealing heavily with unicode characters. Your tags will still be dumbed down according to Txp's internal rules exactly like they are on the Categories panel; you just won't be able to see its name until you click to highlight it.
 
@@ -4682,19 +4683,19 @@ If you have used tru_tags and/or rss_unlimited_categories you can import the inf
 
 h3. Source options
 
-* %(atnm)Import from% : Choose from where you wish to import. To see the plugin options, that particular plugin needs to be installed and activated for it to appear.
-* %(atnm)Custom field% : If you have elected to import from custom field, choose which one contains your tag list. If you want to import from more than one, import them one after another.
-* %(atnm)Custom field delimiter% : The character sequence that delimits each tag in your custom field. Default: comma.
-* %(atnm)Articles from section% : Only import tags from the articles in the selected section. If not chosen, it uses all articles in your site
-* %(atnm)Start from parent category% : If you are importing category names from rss_unlimited_categories, you can choose to only import them from this parent and below
-* %(atnm)Delete original% : Empty the Keywords field (tru_tags), custom field, or remove any rss_unlimited_categories linked to the articles you are importing from. For safety, you should do this in two steps; import the tags and leave the originals intact, then import again with _Delete originals_ set to 'yes' once you are happy with the results. Note that Textpattern category1 and category2 assignments are _not_ deleted.
+* *Import from*: Choose from where you wish to import. To see the plugin options, that particular plugin needs to be installed and activated for it to appear.
+* *Custom field*: If you have elected to import from custom field, choose which one contains your tag list. If you want to import from more than one, import them one after another.
+* *Custom field delimiter*: The character sequence that delimits each tag in your custom field. Default: comma.
+* *Articles from section*: Only import tags from the articles in the selected section. If not chosen, it uses all articles in your site.
+* *Start from parent category*: If you are importing category names from rss_unlimited_categories, you can choose to only import them from this parent and below.
+* *Delete original*: Empty the Keywords field (tru_tags), custom field, or remove any rss_unlimited_categories linked to the articles you are importing from. For safety, you should do this in two steps; import the tags and leave the originals intact, then import again with _Delete originals_ set to 'yes' once you are happy with the results. Note that Textpattern category1 and category2 assignments are _not_ deleted.
 
 h3. Import options
 
-* %(atnm)Link to category% : if you permit tags to be linked to category, this dropdown is available. All imported keywords/categories will be linked to this Txp category
-* %(atnm)Force category link if tag already exists% : if checked, any tags that have already been imported will have their category re-assigned to the chosen category. If not checked, any tag that already exists will have its category left intact
-* %(atnm)Assign to parent tag% : Link all imported keywords/categories beneath this smd_tag. If you are linking tags to categories then the available parent tags will be influenced by the setting of the category chosen above
-* %(atnm)Force parent if tag already exists% : if checked, any tags that have already been imported will have their parent re-assigned to the chosen smd_tag. If not checked, any tag that already exists will have its tag hierarchy left intact
+* *Link to category*: if you permit tags to be linked to category, this dropdown is available. All imported keywords/categories will be linked to this Txp category
+* *Force category link if tag already exists*: if checked, any tags that have already been imported will have their category re-assigned to the chosen category. If not checked, any tag that already exists will have its category left intact
+* *Assign to parent tag*: Link all imported keywords/categories beneath this smd_tag. If you are linking tags to categories then the available parent tags will be influenced by the setting of the category chosen above
+* *Force parent if tag already exists*: if checked, any tags that have already been imported will have their parent re-assigned to the chosen smd_tag. If not checked, any tag that already exists will have its tag hierarchy left intact
 
 Once you have chosen the relevant options, hit _Go_. The plugin will do your bidding and:
 
@@ -4726,14 +4727,14 @@ h2(tag). Tag: @<txp:smd_tag_list>@
 
 Display a list of tags matching certain criteria, from the current context (URL, article, file, link, or image) or a fixed context supplied as attributes. Use the following attributes to configure the tag:
 
-; %(atnm)type%
+; *type*
 : Where to look for the list of tags. If omitted the best match is used based on where the tag is used. For example, if it is inside the @plainlinks@ form, the type would default to @link@. If a best match cannot be found, it uses @article@. Options are:
 :: @article@
 :: @image@
 :: @file@
 :: @link@
 : Default: best match.
-; %(atnm)flavour%
+; *flavour*
 : The type of tag list to display. Choose from:
 :: @list@ : a standard list in parent->child (tree) order
 :: @cloud@ : a weighted tag cloud
@@ -4742,16 +4743,16 @@ Display a list of tags matching certain criteria, from the current context (URL,
 :: @tail@ : the last tag listed in the URL
 : When using @cloud@, some weighting information is calculated for each tag at the expense of a little extra processing overhead. You can also, optionally, specify the scale by adding @:min:max@. For example: @flavour="cloud:75:300"@ would make the minimum weight 75 and the maximum 300. Default is @:100:150@.
 : Default: @list@
-; %(atnm)id%
+; *id*
 : List of tag IDs to show. If omitted and you were viewing an article it will default to the tags from the current article.
-; %(atnm)name%
+; *name*
 : Fixed list of tag names to show. If used, they trump the @id@.
-; %(atnm)exclude%
+; *exclude*
 : List of tag names you wish to omit from the list
-; %(atnm)parent%
+; *parent*
 : Start the list from this parent tag.
 : Default: unset (i.e. the 'root' node of this particular type)
-; %(atnm)sublevel%
+; *sublevel*
 : Only show tags matching this number level. You can either specify:
 :: @all@ which shows all tags from all levels
 :: _any number_ to match only tags from that level.
@@ -4762,84 +4763,84 @@ Display a list of tags matching certain criteria, from the current context (URL,
 :: @<=@
 : If anything else is used, equality is assumed.
 : Note that if you specify a parent, and that parent is in the current tag list, its level is 0 and the children beneath it start at level 1. If, however, your chosen parent is not in the current tag list, _the children will be at level 0 and any sub-children will start from level 1_. To help manage this, if you leave @sublevel@ empty the plugin figures out the appropriate level automatically and only shows tags below the given parent.
-; %(atnm)showall%
+; *showall*
 : Whether to show empty tags or not. Choose from:
 :: 0: only show tags that are in use
 :: 1: show all tags, even empty ones. Useful for generating hierarchical tag trees
 : Default: 0
-; %(atnm)offset%
+; *offset*
 : Skip over this number of tags before starting to display them
-; %(atnm)limit%
+; *limit*
 : The maximum number of tags to show.
 : Default: 99999 (i.e. effectively unlimited)
-; %(atnm)form%
+; *form*
 : Pass control to this form to display the tag list. You may also use the tag as a container. Without form or container, the tag name and its count will be output.
-; %(atnm)indent%
+; *indent*
 : Character sequence to use to indicate that a tag is a sub-tag of a parent.
 : Default: two non-breaking spaces
-; %(atnm)section_link%
+; *section_link*
 : If you want the tags to be clickable so they lead to another page of tag details, this can be used to override the 'landing page' they will appear on.
 : Default: unset (it uses the value of the @Default section for tags@ preference)
-; %(atnm)sort%
+; *sort*
 : Order the results by this field, e.g. @sort="name asc"@.
-; %(atnm)shuffle%
+; *shuffle*
 : Randomly sort the tags.
-; %(atnm)label%
+; *label*
 : Label the top of the list with this heading.
-; %(atnm)labeltag%
+; *labeltag*
 : Wrap the label with this HTML tag (e.g. @labeltag="div"@).
-; %(atnm)wraptag%
+; *wraptag*
 : Wrap the tag list with this HTML tag.
 : Default: @ul@
-; %(atnm)class%
+; *class*
 : Apply this CSS class to the tag list.
 : Default: @smd_tag_list@
-; %(atnm)break%
+; *break*
 : Wrap each tag with this HTML tag.
 : Default: @li@
-; %(atnm)breakclass%
+; *breakclass*
 : Apply this CSS class to each tag.
 
 h2(tag). Tag: @<txp:smd_tag_name>@
 
 Display the name of the current tag. Ususally used inside an smd_tag_list container. Can be a container to add extra formatting around the name if you wish. Use the following attributes to customise the tag:
 
-; %(atnm)title%
+; *title*
 : Whether to show the tag name or its title. Choose from:
 :: 0: name
 :: 1: title
 : Default: 1
-; %(atnm)link%
+; *link*
 : Whether to make the tag clickable to take visitors to a tag page about that particular tag. Choose from:
 :: 0: not clickable
 :: 1: clickable
 : Default: 0
-; %(atnm)section%
+; *section*
 : The section name to link to.
 : Default: the first item in the @Trigger(s) for tag lists@ preference
-; %(atnm)cleanurls%
+; *cleanurls*
 : Whether to generate clean URL syntax for trigger/tagtype/tag links. Choose from:
 :: 0: messy tag mode (use this if you're having trouble with clean mode)
 :: 1: clean mode
 : Default: 1
-; %(atnm)parent%
+; *parent*
 : Not very useful to display, but can be useful to offer tree-browsing of tags. Choose from:
 :: 0: don't use parent tag name
 :: 1: use parent tag name
 : Default: 0
-; %(atnm)parentlabel%
+; *parentlabel*
 : The label to use for any parent links.
 : Default: 'Up a level'
-; %(atnm)wraptag%
+; *wraptag*
 : Wrap the tag with this HTML tag.
-; %(atnm)class%
+; *class*
 : Apply this CSS class to the wraptag.
 : Default: @smd_tag_name@
-; %(atnm)style%
+; *style*
 : Apply this CSS inline style definition to the tag.
-; %(atnm)pad_str%
+; *pad_str*
 : Put this string adjacent to the label to indicate its level in the hierarchy.
-; %(atnm)pad_pos%
+; *pad_pos*
 : Where to put the padding. Choose from:
 :: @left@
 :: @right@
@@ -4851,22 +4852,22 @@ h2(tag). Tag: @<txp:smd_tag_count>@
 
 Display the number of articles, files, images or links that use the current tag. Use the following attributes to customise the tag:
 
-; %(atnm)showempty%
+; *showempty*
 : Determines whether to display counts that have zero items.
 :: 0: skip zero values
 :: 1: show all values, even if zero
 : Default: 1
-; %(atnm)wraptag%
+; *wraptag*
 : Wrap the count with this HTML tag.
-; %(atnm)class%
+; *class*
 : Apply this CSS class to the count.
 : Default: @smd_tag_count@
-; %(atnm)style%
+; *style*
 : Apply this CSS inline style definition to the count.
-; %(atnm)wrapcount%
+; *wrapcount*
 : Characters to wrap around the count itself. Specify up to two items, separated by a colon. If you use just one item it will appear on both sides of the count.
 : Default: @ (:)@ (with a space at the start)
-; %(atnm)paramdelim%
+; *paramdelim*
 : If you don't like the default separator for the @wrapcount@ attribute, change it.
 : Default: @:@ (colon)
 
@@ -4876,7 +4877,7 @@ h3. Example: display tags/counts from the current article
 
 Here's an example, using the last three tags. In your default article form, add this to show a list of clickable tags associated with the current article:
 
-bc(block). Filed in: <txp:smd_tag_list wraptag="" break=" | "
+bc. Filed in: <txp:smd_tag_list wraptag="" break=" | "
      shuffle="1" indent="">
   <txp:smd_tag_name link="1" />
   <txp:smd_tag_count wrapcount="/" />
@@ -4890,7 +4891,7 @@ h2(tag). Tag: @<txp:smd_tag_info>@
 
 Display any other pieces of information about a tag. Use the following attributes to customise the tag:
 
-; %(atnm)item%
+; *item*
 : List of one or more things to display. Can be any of:
 :: @id@
 :: @name@
@@ -4905,22 +4906,22 @@ Display any other pieces of information about a tag. Use the following attribute
 :: @count@ (number of articles/images/files/links assigned to this tag)
 :: @weight@ ('size' of this tag, weighted as a percentage of all tags based on the count: useful inside @style@ attribute of smd_tag_name for creating weighted tag clouds)
 : Default: @name@
-; %(atnm)wraptag%
+; *wraptag*
 : Wrap the tag items with this HTML tag.
-; %(atnm)class%
+; *class*
 : Apply this CSS class to the tag items.
 : Default: @smd_tag_info@
-; %(atnm)break%
+; *break*
 : Wrap each tag item with this HTML tag.
 : Default: @br@
-; %(atnm)breakclass%
+; *breakclass*
 : Apply this CSS class to each tag item.
 
 h3. Example: extended tag information
 
 Inside an smd_tag_list, put this to display some information about each tag:
 
-bc(block). <txp:smd_tag_info item="id" />:
+bc. <txp:smd_tag_info item="id" />:
  <p>parent | #children | level<br />
  <txp:smd_tag_info item="parent, children, level"
       break=" | " /></p>
@@ -4933,29 +4934,29 @@ h2(tag). Tag: @<txp:smd_if_tag>@
 
 Rudimentary conditional to check a tag for certain parameters and execute the contained content if it matches. Every attribute you specify must match for the conditional content to be executed, otherwise any @<txp:else />@ branch will be followed. Use the following attributes to customise it:
 
-; %(atnm)type%
+; *type*
 : Executes the contained statements if the type matches the one given. Takes one of:
 :: @article@
 :: @image@
 :: @file@
 :: @link@
-; %(atnm)id%
+; *id*
 : Checks if the tag ID matches the one given
-; %(atnm)name%
+; *name*
 : Checks if the tag name matches the one given
-; %(atnm)title%
+; *title*
 : Checks if the tag title matches the one given
-; %(atnm)description%
+; *description*
 : Checks if the tag description matches the one given
-; %(atnm)parent%
+; *parent*
 : Checks if the tag parent matches the one given
-; %(atnm)count%
+; *count*
 : Checks if the tag count matches the number given
-; %(atnm)children%
+; *children*
 : Checks if the number of children the tag has matches the number given
-; %(atnm)level%
+; *level*
 : Checks if the tag is at a specific level in the hierarchy
-; %(atnm)is%
+; *is*
 : Checks if the tag is of a particular variety. Choose from:
 :: @master@ : one of the master tags
 :: @first@ : the first tag in the list
@@ -4971,7 +4972,7 @@ Each of the items (except @is@) may take an exact value/string to match or a mod
 
 For example:
 
-bc(block). <txp:smd_if_tag parent="!root" count=">8">
+bc. <txp:smd_if_tag parent="!root" count=">8">
 // Current tag is not a top-level tag and has
 // more than 8 items associated with it
 </txp:smd_if_tag>
@@ -4988,14 +4989,14 @@ Finally, you can also match other stuff such as image, file, link or article cat
 
 Use the following attributes to customise the tag:
 
-; %(atnm)type%
+; *type*
 : The type of information you want to _find_. Can be one of:
 :: @article@
 :: @image@
 :: @file@
 :: @link@
 : Default: the same type as the current context (i.e. if in an article, will look for other articles)
-; %(atnm)match%
+; *match*
 : The information you want to _compare_. Can be one of:
 :: @tag_name@
 :: @tag_id@
@@ -5007,49 +5008,49 @@ Use the following attributes to customise the tag:
 :: @tag_level@
 :: some field name such as @category@ or @custom1@
 : Default: @tag_name@
-; %(atnm)match_self%
+; *match_self*
 : Whether to include a reference to the current item. Usually you won't want this so it is off and in fact, setting it on can sometimes cause errors. Options:
 :: 0: off
 :: 1: on
 : Default: 0
-; %(atnm)form%
+; *form*
 : Pass control to the given form for rendering the tag output. Can also be used as a container. If you don't specify either a @form@ or a container, it outputs some sensible default based on the current context (i.e. the permlinked article title in the @article@ context, the file download link in the @file@ context, etc)
-; %(atnm)section%
+; *section*
 : %(important)Only of use for articles%. Limits the search to articles in a particular section.
 : Default: current section, but check the caveats below for a side-effect of this attribute
-; %(atnm)offset%
+; *offset*
 : Skip this number of matched items before starting to display them.
-; %(atnm)limit%
+; *limit*
 : The maximum number of items to display.
 : Default: 99999 (i.e. virtually unlimited)
-; %(atnm)no_widow%
+; *no_widow*
 : When displaying article titles, prevent lone words on the 2nd line.
 : Default: Txp Admin preference of the same name
-; %(atnm)sort%
+; *sort*
 : Reorder the items by some field.
 : Default: @Posted desc@ for articles / @date desc@ for everything else
-; %(atnm)label%
+; *label*
 : Display this label at the top of the list of items
-; %(atnm)labeltag%
+; *labeltag*
 : Wrap this HTML tag around the label.
-; %(atnm)wraptag%
+; *wraptag*
 : Wrap this HTML tag around the items.
-; %(atnm)break%
+; *break*
 : Wrap each item with this HTML tag.
 : Default: @br@
-; %(atnm)class%
+; *class*
 : Apply the given CSS class to the item list.
 : Default: @smd_related_tags@
-; %(atnm)delim%
+; *delim*
 : If you prefer something other than the default to specify lists of items in the tag attributes, change it.
 : Default: @,@ (comma)
-; %(atnm)paramdelim%
+; *paramdelim*
 : If you prefer something other than the default to separate parameters inside attributes, change it.
 : Default: @:@ (colon)
 
 When specifying items to @match@ you are not restricted to searching the current context. For example, say you had a list of file downloads and next to each file you wanted to show the articles that matched the file's category. You might do this in your @files@ form:
 
-bc(block). <txp:file_download_link>
+bc. <txp:file_download_link>
   <txp:file_download_name />
 </txp:file_download_link>
 <txp:smd_related_tags type="article"
@@ -5061,7 +5062,7 @@ h3. Caveat
 
 Be careful with the @section@ attribute: on a tag list, _all_ items of a given type are considered, irrespective of section. Thus if you did:
 
-bc(block). <txp:smd_if_tag_list>
+bc. <txp:smd_if_tag_list>
   <h2>Tags list</h2>
   <txp:smd_tag_list>
     <txp:smd_tag_name title="1" link="1" />
@@ -5074,7 +5075,7 @@ You might see a tag name with a count of 12 but only 7 articles listed under it,
 
 h2(#eg1). Example 1: linked tag tree
 
-bc(block). <txp:smd_tag_list showall="1" parent="translations">
+bc. <txp:smd_tag_list showall="1" parent="translations">
    <txp:smd_tag_info item="indent" />
    <txp:smd_if_tag children=">0">
       <txp:hide> A parent tag: do not link </txp:hide>
@@ -5088,7 +5089,7 @@ bc(block). <txp:smd_tag_list showall="1" parent="translations">
 
 h2(#eg2). Example 2: font-weighted tag cloud
 
-bc(block). <txp:smd_tag_list parent="animals" flavour="cloud:75:300"
+bc. <txp:smd_tag_list parent="animals" flavour="cloud:75:300"
       wraptag="div" break="">
    <txp:variable name="fontweight">
       font-size:<txp:smd_tag_info item="weight" />%;
@@ -5101,7 +5102,7 @@ bc(block). <txp:smd_tag_list parent="animals" flavour="cloud:75:300"
 
 h2(#eg3). Example 3: weighted alphabetic tag listing
 
-bc(block). <txp:smd_tag_list showall="1" sort="name asc"
+bc. <txp:smd_tag_list showall="1" sort="name asc"
      break="" wraptag="div" flavour="cloud">
    <txp:if_different>
       <h2 class="alphachar"><txp:smd_tag_info item="lettername" /></h2>
@@ -5117,23 +5118,8 @@ Just take out the @flavour@ and @style@ attributes to render a regular alphabeti
 
 h2(author). Author
 
-"Stef Dawson":http://stefdawson.com/contact
+"Stef Dawson":https://stefdawson.com/contact
 
-h2(#changelog). Changelog
-
-Beta:
-
-* 13 Apr 2010 | 0.31 | Fixed admin side bugs when privs less than Managing Editor; fixed slow response when saving tags; fixed tag category list when no cat(s) selected; warning messages now blink; tidied Tag Manager layout; fixed parent / sublevel handling in smd_tag_list and allowed greater control over level output (thanks woof); added @pad_str@ and @pad_pos@ to smd_tag_name; fixed smd_if_tag so it compares empty strings correctly (thanks johnstephens)
-* 23 Mar 2010 | 0.30 | Requires 4.2.0+; consolidated admin and client plugins; added plugin lifecycle and prefs events; fixed textarea/textarea+ jQuery '@' bug and non-saves (thanks Zanza); fixed middot HTML entity; added table prefix to smd_related_tags (thanks MattD)
-* 16 Apr 2009 | 0.20 | added Text area+; select list size of 1 converts tag input to a single-entry dropdown (thanks thebombsite); fixed width of tag list in link pane; fixed potential context array warning; non-messy URL rewriting fixed; began work on multi-filtering; Txp 4.0.7+ database warnings fixed; non-messy URL rewriting fixed; added smd_related_tags @status@ attribute (thanks johnstephens); smd_if_tag: now correctly works outside smd_tag_list context (thanks danwoodward)
-* 16 Oct 2008 | 0.11 | Improved help examples surrounding the autocomplete plugin (thanks thebombsite); fixed remove_tables, use of PFX and added debug to installation procedure (thanks jpdupont)
-* 15 Oct 2008 | 0.10 | Initial release
-
-Official:
-
-* 29 Jun 2015 | 0.51 | Removed hold-shift-for-advanced-options; added Textpack; fixed prefs page styling; added total tag counts and sums (thanks jakob/bojay)
-* 25 Apr 2013 | 0.50 | For Txp 4.5.x; improved performance (again) via cacheing; rewrote URL handler; added tag descriptions; enabled AND/OR multi-tag searches; added master tag support; added import from Txp cat / custom field (thanks josh); permitted bi-directional tag tree searching; permitted nested smd_tag_list tags (thanks sacripant); permitted tag parents assigned to categories to be removed from lists (thanks pieman); added smd_tag_list flavours @crumb@, @head@ and @tail@; added @is@ test to smd_if_tag; smd_related_tags: added DB columns from recent Txp releases; fixed information_schema warning on new installs (thanks jayrope); fixed missing tag lists if no categories defined; fixed bogus URLs in subdir installs in smd_tag_name (thanks sacripant / jpdupont); fixed SQL error when deleting non-orphan tags (thanks tye); fixed if_tag_list context trigger with empty URL params; fixed smd_tag_list on empty list and non-list pages; made smd_tag_name play with gbp_permanent_links; fixed smd_related_tags in showall context; swapped @&nbsp;@ for @&#160;@
-* 05 Feb 2011 | 0.40 | Added live search and multi-edit functions; improved performance; added tag import from tru_tags and rss_unlimited_categories; enabled delimited tag entry; fixed rogue slashes in cat lists; fixed URL handler and smd_tag_name to support per-section tag lists, clean URL syntax, and enabled multiple trigger words (all thanks jakob); PHP 5.3 compatibility fix (thanks birdhouse); fixed warnings in smd_related_tags; fixed tag list when no linked cats selected and when category changed; added 'list' and 'group' tag display options; added @sort@, @showall@ and @flavour@ to smd_tag_list for tree and tag cloud support; added @lettername@, @lettertitle@ and @weight@ items to smd_tag_info for building alphabetic tag groups and clouds; changed table collation to utf8_general_ci and improved unicode support; fixed bug in smd_if_tag (again!) when using non-eq tests; added @style@ to smd_tag_name and smd_tag_count
 # --- END PLUGIN HELP ---
 -->
 <?php
