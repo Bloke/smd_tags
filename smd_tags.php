@@ -3978,7 +3978,7 @@ function smd_related_tags($atts = array(), $thing = null)
     // Lookup table for making SQL queries
     $sqlStubs = array(
         "article" => array(
-            "select" => "txp.ID, Posted, Expires, AuthorID, LastMod, LastModID, txp.Title, Title_html, Body, Body_html, Excerpt, Excerpt_html, Image, Category1, Category2, Annotate, AnnotateInvite, comments_count, Status, textile_body, textile_excerpt, Section, override_form, Keywords, txp.description, url_title" . ($cfKeys ? ','. $cfKeys : '') . ", uid, feed_time, position, unix_timestamp(Posted) as uPosted, unix_timestamp(LastMod) as uLastMod, unix_timestamp(Expires) as uExpires, COUNT(smt.name) as tag_sum",
+            "select" => "txp.ID, Posted, Expires, AuthorID, LastMod, LastModID, txp.Title, Title_html, Body, Body_html, Excerpt, Excerpt_html, Image, Category1, Category2, Annotate, AnnotateInvite, comments_count, Status, textile_body, textile_excerpt, Section, override_form, Keywords, txp.description, url_title" . ($cfKeys ? ','. $cfKeys : '') . ", uid, feed_time, unix_timestamp(Posted) as uPosted, unix_timestamp(LastMod) as uLastMod, unix_timestamp(Expires) as uExpires, COUNT(smt.name) as tag_sum",
             "table" => "textpattern",
             "gtags" => $thisarticle,
             "gid" => "thisid",
