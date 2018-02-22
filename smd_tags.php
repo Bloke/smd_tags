@@ -56,6 +56,7 @@ $plugin['flags'] = '3';
 
 $plugin['textpack'] = <<<EOT
 #@smd_tag
+#@language en
 smd_tags => Tags (smd)
 smd_tag_ac_std => Standard
 smd_tag_ac_str => Strict
@@ -800,12 +801,14 @@ function smd_tags_multi_edit($evt, $stp) {
 
 // ------------------------
 // Grab the current article/image/file/link ID
-function smd_getID() {
-    if(!empty($GLOBALS['ID'])) { // newly-saved item
+function smd_getID()
+{
+    if (!empty($GLOBALS['ID'])) { // newly-saved item
         $itemID = intval($GLOBALS['ID']);
     } else {
         $itemID = (gps('ID')) ? gps('ID') : gps('id');
     }
+
     return $itemID;
 }
 
@@ -817,9 +820,35 @@ function smd_tags_inject_css($evt, $stp)
 {
     global $event;
 
+    $eventmap = array(
+        'article' => 'list',
+        'file'    => 'file',
+        'image'   => 'image',
+        'link'    => 'link',
+        'list'    => 'list',
+    );
+
+    $smd_tag_preflist = smd_tags_get_prefs('name');
+    $prefset = smd_tags_pref_get($smd_tag_preflist);
+    $onoff = smd_tags_pref_explode($prefset['smd_tag_p_enable']['val']);
+    $mapped = isset($eventmap[$event]) ? $eventmap[$event] : '';
+    $addIt = ($mapped && $onoff[gTxt('tab_'.$mapped)] == 1) ? true : false;
+
+    $stylereps = array(
+        '{hov}' => $prefset['smd_tag_t_hover']['val'],
+        '{cur}' => $prefset['smd_tag_t_hilite']['val'],
+    );
+
+    $plugin_styles = array();
+
     if ($event === 'smd_tags') {
-        $plugin_styles = smd_tags_get_style_rules();
-        echo '<style>' . $plugin_styles . '</style>';
+        $plugin_styles[] = smd_tags_get_style_rules('all');
+    } elseif ($addIt) {
+        $plugin_styles[] = smd_tags_get_style_rules('common');
+    }
+
+    if ($plugin_styles) {
+        echo '<style>' . strtr(implode(n, $plugin_styles), $stylereps) . '</style>';
     }
 
     return;
@@ -828,11 +857,9 @@ function smd_tags_inject_css($evt, $stp)
 /**
  * CSS definitions: hopefully kind to themers.
  */
-function smd_tags_get_style_rules()
+function smd_tags_get_style_rules($type = 'all')
 {
-    $smd_tags_styles = array(
-        '.smd_hidden { display:none; }',
-        '.smd_hover { cursor:pointer; background:#{hov}; }',
+    $smd_tags_styles['tag'] = array(
         '.smd_current { padding:3px; font-weight:bold; background:#{cur}; }',
         '.smd_tags_showpars, .smd_tags_linkcat { max-width:12em; }',
         '.smd_tag_list_adm { display: flex; flex-wrap: wrap; justify-content: space-between; }',
@@ -846,17 +873,30 @@ function smd_tags_get_style_rules()
         '.smd_tags_new input[type="submit"] { margin:1.5em 0 0; }',
         '.smd_tags_input_group { float:left; margin:0 1em; }',
         '.smd_tags_pool { clear:both; padding:1em 0;}',
-        '.smd_fakebtn, #smd_tags_bylink span { cursor:pointer; }',
-        '.smd_tagip { margin:.4em 0 .8em; max-width:400px; }',
-        '.smd_sel { font-weight:bold; }',
-        '.smd_tooltip { position:absolute; background:#eee; max-width:300px; min-width:150px; border:1px solid black; padding:1em; box-shadow:5px 5px 4px #999; }',
         '#smd_tag_report_pane { display:none; position:absolute; left:200px; max-width:500px; border:3px ridge #999; opacity:.92; filter:alpha(opacity:92); padding:15px 20px; background-color:#e2dfce; color:#80551e; }',
         '#smd_tag_report_pane .publish { float:right; }',
         '.smd_tags_btn_ok { position: absolute; top: .27777777777778em; right: .72222222222222em; font-size: 18px; font-weight: 700; text-decoration: none; }',
         '.txp-actions { float:right; }',
     );
 
-    return implode(n, $smd_tags_styles);
+    $smd_tags_styles['common'] = array(
+        '.smd_hidden { display:none; }',
+        '.smd_hover { cursor:pointer; background:#{hov}; }',
+        '.smd_fakebtn, #smd_tags_bylink span { cursor:pointer; }',
+        '.smd_tagip { margin:.4em 0 .8em; max-width:400px; }',
+        '.smd_sel { font-weight:bold; }',
+        '.smd_tooltip { position:absolute; background:#eee; max-width:300px; min-width:150px; border:1px solid black; padding:1em; box-shadow:5px 5px 4px #999; z-index:100; }',
+    );
+
+    $out = array();
+
+    if ($type === 'all') {
+        $out = array_merge($smd_tags_styles['tag'], $smd_tags_styles['common']);
+    } elseif (array_key_exists($type, $smd_tags_styles)) {
+        $out = $smd_tags_styles[$type];
+    }
+
+    return implode(n, $out);
 }
 
 /**
@@ -1479,11 +1519,6 @@ function smd_tags_manage($message = '', $report = '')
     $prefset = smd_tags_pref_get($smd_tag_prefs);
     $numReqPrefs = count($smd_tag_prefs);
     $numPrefs = count($prefset);
-
-    $stylereps = array(
-        '{hov}' => $prefset['smd_tag_t_hover']['val'],
-        '{cur}' => $prefset['smd_tag_t_hilite']['val'],
-    );
 
     $types = array(
         'article' => ucfirst(gtxt('article')),
