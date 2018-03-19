@@ -3597,7 +3597,6 @@ function array_combine($arr1, $arr2) {
 // PUBLIC TAGS
 // ------------------------
 // Check tags of a particular type, or those that have a specific property in context.
-//TODO: Think about checking logic, eg, name="business|pleasure" (OR) name="business+pleasure" (AND)
 function smd_if_tag ($atts, $thing) {
     global $smd_tags, $smd_tag_type, $smd_thistag;
 
@@ -3616,6 +3615,7 @@ function smd_if_tag ($atts, $thing) {
         'count'       => NULL,
         'children'    => NULL,
         'level'       => NULL,
+        'search_mode' => NULL,
         'is'          => NULL,
     ),$atts));
 
@@ -3627,6 +3627,7 @@ function smd_if_tag ($atts, $thing) {
 
     $eqtest = array();
     $nutest = array();
+    $searchtest = array();
     $opRE = '/(\>|\>\=|\<|\<\=|\!)([0-9a-zA-Z- ]+)/';
 
     // Master tag?
@@ -3637,6 +3638,11 @@ function smd_if_tag ($atts, $thing) {
     // Start / end of list?
     $eqtest['first'] = ($is == 'first') ? 1 : NULL;
     $eqtest['last'] = ($is == 'last') ? 1 : NULL;
+
+    // Combination moade?
+    $searchtest['single'] = ($search_mode == 'single') ? 1 : NULL;
+    $searchtest['or'] = ($search_mode == 'or') ? 1 : NULL;
+    $searchtest['and'] = ($search_mode == 'and') ? 1 : NULL;
 
     // TODO: Consolidate this into a loop for each 'id', 'name', type', 'title', ...
     $num = preg_match_all($opRE, $id, $parts);
@@ -3675,7 +3681,8 @@ function smd_if_tag ($atts, $thing) {
     $eqtest['level'] = ($num<=0) ? $level : NULL;
     if ($num>0) $nutest['level'] = array($parts[1][0] => $parts[2][0]);
 
-    trace_add('[smd_if_tag equality tests: '. join (', ', $eqtest) . ']');
+    trace_add('[smd_if_tag equality tests: '. implode(', ', $eqtest) . ']');
+    trace_add('[smd_if_tag search_mode tests: '. implode(', ', $searchtest) . ']');
     trace_add('[smd_if_tag numeric tests: '.  print_r($nutest, true) . ']');
 
     // Init
@@ -3692,12 +3699,12 @@ function smd_if_tag ($atts, $thing) {
                 $tname = ($tname == 'master') ? 'parent' : $tname;
 
                 if ($smd_thistag) {
-                    // Local scope
+                    // Local scope.
                     if ($smd_thistag['tag_'.$tname] == $tval) {
                         $out++;
                     }
                 } else {
-                    // Global scope
+                    // Global scope.
                     if ($tname == "type") {
                         if ($smd_tag_type == $type || $ctype == $type) {
                             $out++;
@@ -3706,6 +3713,17 @@ function smd_if_tag ($atts, $thing) {
                     if (isset($smd_tags[$type]['tag_'.$tname]) && in_array($tval, $smd_tags[$type]['tag_'.$tname], empty($tval) && $tval !== '0')) {
                         $out++;
                     }
+                }
+            }
+        }
+        // Search comparisons
+        foreach ($searchtest as $tname => $tval) {
+            if (!is_null($tval)) {
+                $numTests++;
+
+                // Global scope only for search mode.
+                if (isset($smd_tags['meta']['search_mode']) && $smd_tags['meta']['search_mode'] == $tname) {
+                    $out++;
                 }
             }
         }
