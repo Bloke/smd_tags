@@ -4372,7 +4372,7 @@ function smd_tag_list($atts = array(), $thing = null)
         $totals = array();
         $outsub = array();
 
-        while (list($key, $row) = each($rs)) {
+        foreach ($rs as $key => $row) {
             // Only add the row if one of:
             // 1) showall is on
             // 2) sublevel = 'all'
