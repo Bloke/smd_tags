@@ -55,9 +55,10 @@ $plugin['flags'] = '3';
 // abc_string_name => Localized String
 
 $plugin['textpack'] = <<<EOT
-#@smd_tag
-#@language en
+#@language en, en-gb, en-us
+#@admin-side
 smd_tags => Tags (smd)
+#@smd_tag
 smd_tag_ac_std => Standard
 smd_tag_ac_str => Strict
 smd_tag_all_lbl => All
