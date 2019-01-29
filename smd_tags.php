@@ -4037,19 +4037,19 @@ function smd_related_tags($atts = array(), $thing = null)
             "gid" => "thisid",
         ),
         "image" => array(
-            "select" => "txp.id, txp.name, txp.category, txp.ext, txp.w, txp.h, txp.alt, txp.caption, txp.date, txp.author, txp.thumb_w, txp.thumb_h, txp.thumbnail, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title, COUNT(smt.name) as tag_sum",
+            "select" => "txp.id, txp.name, txp.category, txp.ext, txp.w, txp.h, txp.alt, txp.caption, txp.date, txp.author, txp.thumb_w, txp.thumb_h, txp.thumbnail, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title as tag_title, COUNT(smt.name) as tag_sum",
             "table" => "txp_image",
             "gtags" => $thisimage,
             "gid" => "id",
         ),
         "file" => array(
-            "select" => "txp.id, txp.filename, txp.title, txp.category, txp.permissions, txp.description, txp.downloads, txp.status, txp.modified, txp.created, txp.size, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title, COUNT(smt.name) as tag_sum",
+            "select" => "txp.id, txp.filename, txp.title, txp.category, txp.permissions, txp.description, txp.downloads, txp.status, txp.modified, txp.created, txp.size, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title as tag_title, COUNT(smt.name) as tag_sum",
             "table" => "txp_file",
             "gtags" => $thisfile,
             "gid" => "id",
         ),
         "link" => array(
-            "select" => "txp.id, txp.date, txp.category, txp.url, txp.linkname, txp.linksort, txp.description, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title, COUNT(smt.name) as tag_sum",
+            "select" => "txp.id, txp.date, txp.category, txp.url, txp.linkname, txp.linksort, txp.description, tu.item_id, tu.tag_id, smt.id AS smtid, smt.name AS smtname, smt.desc_html AS smtdescription, smt.type, smt.parent, smt.lft, smt.rgt, smt.title as tag_title, COUNT(smt.name) as tag_sum",
             "table" => "txp_link",
             "gtags" => $thislink,
             "gid" => "id",
