@@ -2007,8 +2007,7 @@ EOJS
 function smd_tag_save() {
     // Defer doSlash of description until after Textile's had a go
     extract(doSlash(gpsa(array('smd_tag_oname', 'smd_tag_name', 'smd_tag_title', 'smd_tag_parent', 'smd_tag_cat', 'smd_tag_type', 'smd_tag_id'))));
-    @include_once txpath.'/publish.php'; // for parse()
-    @include_once txpath.'/lib/classTextile.php';
+    include_once txpath.'/publish.php'; // for parse()
 
     $smd_tag_description = $smd_tags_desctile = ps('smd_tag_description');
 
@@ -2022,17 +2021,14 @@ function smd_tag_save() {
     $smd_tag_parent = (!empty($smd_tag_parent)) ? $smd_tag_parent : 'root';
     $smd_tag_name = trim($smd_tag_name);
 
-    if (class_exists('Textile')) {
-        $textile = new Textile();
-        $smd_tags_desctile = doSlash((($txt_desc) ? $textile->TextileThis(parse($smd_tag_description)) : parse($smd_tag_description)));
-    }
-
+    $textile = new \Textpattern\Textile\Parser();
+    $smd_tags_desctile = doSlash((($txt_desc) ? $textile->parse(parse($smd_tag_description)) : parse($smd_tag_description)));
     $smd_tag_description = doSlash($smd_tag_description);
 
     // Can't use safe_upsert() because the WHERE is for ID AND type
     if (empty($smd_tag_id)) {
         // Create
-        if ($smd_tag_name=='' && $smd_tag_title=='') {
+        if ($smd_tag_name == '' && $smd_tag_title == '') {
             $message = array(gTxt('smd_tag_no_name', array('{type}' => ucfirst($smd_tag_type))), E_WARNING);
         } else {
             $alltagnam = do_list($smd_tag_name, $mdelim);
