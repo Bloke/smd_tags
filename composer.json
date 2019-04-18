@@ -1,0 +1,16 @@
+{
+  "name": "bloke/smd_tags",
+  "description": "Unlimited tag taxonomy for articles, images, files and links within Textpattern CMS",
+  "keywords": ["textpattern", "plugin", "tags", "categories"],
+  "homepage": "https://github.com/bloke/smd_tags",
+  "license": "GPL-2.0",
+  "type": "textpattern-plugin",
+  "support": {
+    "issues": "https://github.com/bloke/smd_tags/issues",
+    "source": "https://github.com/bloke/smd_tags"
+  },
+  "require": {
+    "textpattern/lock": ">=4.6.2",
+    "textpattern/installer": "*"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "smd_tags",
+  "description": "Unlimited tag taxonomy for articles, images, files and links",
+  "version": "0.6.1-beta",
+  "type": 5,
+  "author": "Stef Dawson",
+  "author_uri": "https://stefdawson.com/",
+  "order": 5,
+  "flags": 3,
+  "help": {"file" : ["./README.textile"]}
+}

@@ -17,9 +17,9 @@ $plugin['name'] = 'smd_tags';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.60';
+$plugin['version'] = '0.6.1-beta';
 $plugin['author'] = 'Stef Dawson';
-$plugin['author_uri'] = 'http://stefdawson.com/';
+$plugin['author_uri'] = 'https://stefdawson.com/';
 $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and links';
 
 // Plugin load order:
@@ -215,7 +215,7 @@ if (!defined('txpinterface'))
  *   Tag combinators from the URL
  *
  * @author Stef Dawson
- * @link   http://stefdawson.com/
+ * @link   https://stefdawson.com/
  *
  * @todo
  * Remove EvalElse()
