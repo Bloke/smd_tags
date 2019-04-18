@@ -112,9 +112,9 @@ smd_tag_prefs_p => Interface settings
 smd_tag_prefs_pane => Prefs
 smd_tag_prefs_removed => Preferences removed
 smd_tag_prefs_some => Not all preferences available.
-smd_tag_prefs_some_explain => This is either a new installation or a different version<br />of the plugin to one you had before.
-smd_tag_prefs_some_opts1 => Choose "Remove prefs" to remove them all or "Install prefs" to add<br />any new ones, leaving all existing prefs untouched.
-smd_tag_prefs_some_opts2 => Click "Install tables" to add or update the tables<br />leaving all existing data untouched.
+smd_tag_prefs_some_explain => This is either a new installation or a different version of the plugin to one you had before.
+smd_tag_prefs_some_opts1 => Choose "Remove prefs" to remove them all or "Install prefs" to add any new ones, leaving all existing prefs untouched.
+smd_tag_prefs_some_opts2 => Click "Install tables" to add or update the tables leaving all existing data untouched.
 smd_tag_prefs_some_tbl => Not all table info available.
 smd_tag_prefs_t => Tag management
 smd_tag_prefs_title => Tag Preferences
@@ -868,7 +868,7 @@ function smd_tags_get_style_rules($type = 'all')
         '.smd_tag_list_adm.bycol ul { border:1px solid #ccc; padding:1em; }',
         '.smd_tag_list_adm.byrow li { display:inline-block;  }',
         '.smd_tag_list_adm.bycol li { list-style-type:none; }',
-        '#smd_tag_filt { float:right; margin:0; padding:1em 2em; box-shadow: 4px 4px 5px #999; }',
+        '#smd_tag_filt { float:right; margin:0; padding:1em 2em; }',
         '#smd_tag_multisel { margin:10px 0 0; }',
         '.smd_tags_new label {display:block; margin:2px 1px; }',
         '.smd_tags_new input[type="submit"] { margin:1.5em 0 0; }',
@@ -886,7 +886,7 @@ function smd_tags_get_style_rules($type = 'all')
         '.smd_fakebtn, #smd_tags_bylink span { cursor:pointer; }',
         '.smd_tagip { margin:.4em 0 .8em; max-width:400px; }',
         '.smd_sel { font-weight:bold; }',
-        '.smd_tooltip { position:absolute; background:#eee; max-width:300px; min-width:150px; border:1px solid black; padding:1em; box-shadow:5px 5px 4px #999; z-index:100; }',
+        '.smd_tooltip { position:absolute; background:#eee; max-width:300px; min-width:150px; border:1px solid black; padding:1em; z-index:100; }',
     );
 
     $out = array();
@@ -1276,7 +1276,7 @@ function smd_tags_buttons() {
         'btnHelp' => '<a class="pophelp" rel="help" href="?event=plugin'.a.'step=plugin_help'.a.'name=smd_tags">?</a>',
         'btnCreate' => fInput('submit', 'smd_tag_create', gTxt('create'), 'publish', '', 'smd_tags_step=this.name;smd_presub()'),
         'btnSave' => fInput('submit', 'smd_tag_save', gTxt('update'), '', '', 'smd_tags_step=this.name;smd_presub()'),
-        'btnDelete' => fInput('submit', 'smd_tags_delete', '×', '', '', 'smd_tags_step=this.name;smd_presub()'),
+        'btnDelete' => fInput('submit', 'smd_tags_delete', gTxt('delete'), '', '', 'smd_tags_step=this.name;smd_presub()'),
         'btnStyle' => ' style="border:0;height:25px"',
     );
     return $ret;
@@ -1963,7 +1963,7 @@ EOJS
             // The tags themselves
             echo '<div class="smd_tags_pool">'
                     .n.hed(gTxt('smd_tag_pool_lbl'), 2)
-                    .n.'<div class="smd_tags_type_selection">' . $radios .n.'</div>'
+                    .n.graf($radios, array('class' => 'smd_tags_type_selection'))
                     .n.'<div class="smd_tags_showlist">' . $tagout[$smd_tag_type] .n.'</div>'
                 .n.'</div>'
                 .n.'</div>';
