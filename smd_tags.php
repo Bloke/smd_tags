@@ -2,11 +2,11 @@
 
 // This is a PLUGIN TEMPLATE for Textpattern CMS.
 
-// Copy this file to a new name like abc_myplugin.php.  Edit the code, then
+// Copy this file to a new name like abc_myplugin.php. Edit the code, then
 // run this file at the command line to produce a plugin for distribution:
 // $ php abc_myplugin.php > abc_myplugin-0.1.txt
 
-// Plugin name is optional.  If unset, it will be extracted from the current
+// Plugin name is optional. If unset, it will be extracted from the current
 // file name. Plugin names should start with a three letter prefix which is
 // unique and reserved for each plugin author ("abc" is just an example).
 // Uncomment and edit this line to override:
@@ -14,7 +14,7 @@ $plugin['name'] = 'smd_tags';
 
 // Allow raw HTML help, as opposed to Textile.
 // 0 = Plugin help is in Textile format, no raw HTML allowed (default).
-// 1 = Plugin help is in raw HTML.  Not recommended.
+// 1 = Plugin help is in raw HTML. Not recommended.
 # $plugin['allow_html_help'] = 1;
 
 $plugin['version'] = '0.6.1-beta';
@@ -85,7 +85,7 @@ smd_tag_deleted_lbl => Deleted tags:
 smd_tag_err_in_use_lbl => Tags in use:
 smd_tag_err_orphaned_lbl => Orphaned tags:
 smd_tag_exists => {type} tag "{name}" already exists
-smd_tag_extras => More...
+smd_tag_extras => More…
 smd_tag_import_results_pt1 => Articles:
 smd_tag_import_results_pt2 => Tags linked:
 smd_tag_in_use => {type} tag "{name}" is in use
@@ -128,7 +128,7 @@ smd_tag_p_lbi => Bi-directional tag trees
 smd_tag_p_linkcat => Link tags to categories
 smd_tag_p_listpar => Permit parent tag selection
 smd_tag_p_master => Master parent tag
-smd_tag_p_qtag => Quick tag (<a href="http://plugins.jquery.com/project/autocompletex">requires plugin</a>)
+smd_tag_p_qtag => Quick tag (<a rel="external" target="_blank" href="http://plugins.jquery.com/project/autocompletex">requires plugin</a>)
 smd_tag_p_qtpath => JS plugin dir
 smd_tag_p_qtstyl => JS style dir
 smd_tag_p_size => Select/textarea rows
@@ -1330,17 +1330,17 @@ EOJS
         // Tables installed
         echo '<form method="post" action="?event=smd_tags' . a . 'step=smd_tags_prefs_update" onsubmit="return smd_presub();">';
         echo '<div class="txp-layout">'.
-            n. '<div class="txp-layout-2col">'.
-            n. '<h1 class="txp-heading">'.gTxt('smd_tag_prefs_title').sp.$btnHelp.'</h1>'.
-            n. '</div>'.
-            n. '<div class="txp-layout-2col">'.
+            n.'<div class="txp-layout-2col">'.
+            n.'<h1 class="txp-heading">'.gTxt('smd_tag_prefs_title').'</h1>'.
+            n.'</div>'.
+            n.'<div class="txp-layout-2col">'.
             graf(
                     $btnManage
                     .n.$btnSync
                     .n.tag($btnInstall.n.$btnRemove.n.$btnRemoveTbl.n.$btnRebuildTbl, 'span', ' class="smd_tag_btn_advanced smd_hidden"')
                     .n.href($adv_text, '#', ' class="smd_tag_btn_advanced_toggle"')
                 , ' class="txp-actions"').
-            n. '</div>';
+            n.'</div>';
 
         if ($numPrefs == $numReqPrefs) {
             // Prefs all installed
@@ -1367,7 +1367,7 @@ EOJS
                         case "smd_tag_p_enable":
                             $options = smd_tags_pref_explode($pval);
                             foreach ($options as $opt => $onoff) {
-                                $widget .= '<label>'.$opt.'</label>' . checkbox("enable".$opt, 1, $onoff) . '&#160;&#160;';
+                                $widget .= checkbox("enable".$opt, 1, $onoff).n.'<label>'.$opt.'</label>'.n;
                             }
 
                             $widget .= fInput('hidden', 'smd_tag_p_enable', join($options),'','','','','','smd_tag_p_enable');
@@ -1448,7 +1448,7 @@ EOJS
                 $prefOut[] = tag(
                     hed(gTxt($grp), 2, array('id' => 'prefs_group_'.$grp.'-label')).
                     join(n, $out), 'section', array(
-                        'class'           => 'txp-prefs-group',
+                        'class'           => 'txp-tabs-vertical-group',
                         'id'              => 'prefs_group_'.$grp,
                         'aria-labelledby' => 'prefs_group_'.$grp.'-label',
                     )
@@ -1866,15 +1866,15 @@ EOJS
         if ($numPrefs == $numReqPrefs) {
             // Prefs all installed
             echo '<div class="txp-layout">'.
-                n. '<div class="txp-layout-2col">'.
-                n. hed(gTxt('smd_tag_manage_lbl').sp.$btnHelp, 1).
-                n. '</div>'.
-                n. '<div class="txp-layout-2col">'.
+                n.'<div class="txp-layout-2col">'.
+                n.'<h1 class="txp-heading">'.gTxt('smd_tag_manage_lbl').'</h1>'.
+                n.'</div>'.
+                n.'<div class="txp-layout-2col">'.
                 graf(
                     $btnSync
                     .n.$btnPrefs
                 , ' class="txp-actions"').
-            n. '</div>';
+            n.'</div>';
 
             // Live search / multi-edit
             $filtopts = array(
@@ -1898,38 +1898,38 @@ EOJS
             $descw = (int)$descsizes[0];
             $desch = (isset($descsizes[1])) ? (int)$descsizes[1] : $descw;
             echo '<div class="txp-layout-1col">';
-            echo n. '<form id="smd_tag_multiform" action="?event=smd_tags" method="post" onsubmit="smd_multisub(); return verify(\''.gTxt('are_you_sure').'\')">'
-                .n. '<fieldset id="smd_tag_filt"><legend class="txp-summary lever'.(get_pref('pane_smd_tag_filters_visible') ? ' expanded' : '').'"><a href="#smd_tag_filters">'.gTxt('smd_tag_tag_search').'</a></legend><div id="smd_tag_filters" class="toggle" style="display:'.(get_pref('pane_smd_tag_filters_visible') ? 'block' : 'none').'">'
-                .n. hInput('step', '')
-                .n. hInput('smd_tag_type', '')
-                .n. hInput('smd_tag_id', '')
-                .n. hInput('smd_tag_name', '')
-                .n. hInput('smd_tag_description', '')
-                .n. hInput('smd_tag_extra', '')
-                .n. tInput()
-                .n. '<input type="text" name="smd_tagfilter" value="" id="smd_tagfilter" size="30" />'
-                .n. '<span id="smd_tag_filter_count"></span>'
-                .n. '<div id="smd_tag_filt_radios">'.radioSet($filtopts, 'smd_tag_filtopt', 'smd_all', '', 'smd_tag_filtopt').'</div>'
-                .n. '<div id="smd_tag_multisel">'.gTxt('smd_tag_with_filtered').selectInput('smd_tag_multisel',$withselopts, '', true, ' onchange="smd_tags_seledit(this); return false;"').n.fInput('submit', '', gTxt('go'), 'publish').'</div>'
-                .n. '<div id="smd_tag_multi_placeholder"></div><a href="#" id="smd_tags_report_toggler">'.gTxt('smd_tag_recent_report').'</a>'
-                .n. '</div>'
-                .n. '</fieldset>'
-                .n. '</form>';
+            echo n.'<form id="smd_tag_multiform" action="?event=smd_tags" method="post" onsubmit="smd_multisub(); return verify(\''.gTxt('are_you_sure').'\')">'
+                .n.'<fieldset id="smd_tag_filt"><legend class="txp-summary lever'.(get_pref('pane_smd_tag_filters_visible') ? ' expanded' : '').'"><a href="#smd_tag_filters">'.gTxt('smd_tag_tag_search').'</a></legend><div id="smd_tag_filters" class="toggle" style="display:'.(get_pref('pane_smd_tag_filters_visible') ? 'block' : 'none').'">'
+                .n.hInput('step', '')
+                .n.hInput('smd_tag_type', '')
+                .n.hInput('smd_tag_id', '')
+                .n.hInput('smd_tag_name', '')
+                .n.hInput('smd_tag_description', '')
+                .n.hInput('smd_tag_extra', '')
+                .n.tInput()
+                .n.'<input type="text" name="smd_tagfilter" value="" id="smd_tagfilter" size="30" />'
+                .n.'<span id="smd_tag_filter_count"></span>'
+                .n.'<div id="smd_tag_filt_radios">'.radioSet($filtopts, 'smd_tag_filtopt', 'smd_all', '', 'smd_tag_filtopt').'</div>'
+                .n.'<div id="smd_tag_multisel">'.gTxt('smd_tag_with_filtered').selectInput('smd_tag_multisel',$withselopts, '', true, ' onchange="smd_tags_seledit(this); return false;"').n.fInput('submit', '', gTxt('go'), 'publish').'</div>'
+                .n.'<div id="smd_tag_multi_placeholder"></div><a href="#" id="smd_tags_report_toggler">'.gTxt('smd_tag_recent_report').'</a>'
+                .n.'</div>'
+                .n.'</fieldset>'
+                .n.'</form>';
 
             // Report popup
-            echo n. '<div id="smd_tag_report_pane"><div>'.href('&#215;', '#close', ' class="smd_tags_btn_ok" role="button" title="'.gTxt('close').'" aria-label="'.gTxt('close').'"').'<h3>'.gTxt('smd_tag_report_lbl').'</h3>'.$report.'</div></div>'
-                .n. '<form method="post" id="smd_tag_postit" action="?event=smd_tags">'
-                .n. hInput('step', '')
-                .n. hInput('smd_tag_id', $smd_tag_id)
-                .n. hInput('smd_tag_name', '')
-                .n. hInput('smd_tag_oname', $smd_tag_name)
-                .n. hInput('smd_tag_parent', '')
-                .n. hInput('smd_tag_cat', '')
-                .n. hInput('smd_tag_title', '')
-                .n. hInput('smd_tag_type', '')
-                .n. hInput('smd_tag_description', '')
-                .n. tInput()
-                .n. '</form>';
+            echo n.'<div id="smd_tag_report_pane"><div>'.href('&#215;', '#close', ' class="smd_tags_btn_ok" role="button" title="'.gTxt('close').'" aria-label="'.gTxt('close').'"').'<h3>'.gTxt('smd_tag_report_lbl').'</h3>'.$report.'</div></div>'
+                .n.'<form method="post" id="smd_tag_postit" action="?event=smd_tags">'
+                .n.hInput('step', '')
+                .n.hInput('smd_tag_id', $smd_tag_id)
+                .n.hInput('smd_tag_name', '')
+                .n.hInput('smd_tag_oname', $smd_tag_name)
+                .n.hInput('smd_tag_parent', '')
+                .n.hInput('smd_tag_cat', '')
+                .n.hInput('smd_tag_title', '')
+                .n.hInput('smd_tag_type', '')
+                .n.hInput('smd_tag_description', '')
+                .n.tInput()
+                .n.'</form>';
 
             // Tag create/edit row
             echo n.hed(gTxt('smd_tag_create_lbl'), 2)
@@ -1948,55 +1948,55 @@ EOJS
                         . '<label>'.gTxt('parent').'</label>'
                         . '<span class="smd_tags_showpars"></span>'
                         . (($clink)
-                            ? n. '<label>'.gTxt('smd_tag_clink_lbl').'</label>'
-                                .n. '<span class="smd_tags_linkcat"></span>'
+                            ? n.'<label>'.gTxt('smd_tag_clink_lbl').'</label>'
+                                .n.'<span class="smd_tags_linkcat"></span>'
                             : ''
                         )
                     .n.'</div>'
                     .n.'<div class="smd_tags_input_group">'
-                        .n. $btnCreate
-                        .n. $btnSave
-                        .n. $btnDelete
+                        .n.$btnCreate
+                        .n.$btnSave
+                        .n.$btnDelete
                     .n.'</div>'
                 .n.'</div>';
 
             // The tags themselves
             echo '<div class="smd_tags_pool">'
-                    .n. hed(gTxt('smd_tag_pool_lbl'), 2)
-                    .n. '<div class="smd_tags_type_selection">' . $radios .n. '</div>'
-                    .n. '<div class="smd_tags_showlist">' . $tagout[$smd_tag_type] .n. '</div>'
+                    .n.hed(gTxt('smd_tag_pool_lbl'), 2)
+                    .n.'<div class="smd_tags_type_selection">' . $radios .n.'</div>'
+                    .n.'<div class="smd_tags_showlist">' . $tagout[$smd_tag_type] .n.'</div>'
                 .n.'</div>'
                 .n.'</div>';
         } elseif ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
             // Prefs possibly corrupt, or plugin updated
-            echo n. startTable()
-                .n. tr(
+            echo n.startTable()
+                .n.tr(
                     tda(strong(gTxt('smd_tag_prefs_some')).br.br
                         .gTxt('smd_tag_prefs_some_explain').br.br
                         .gTxt('smd_tag_prefs_some_opts1'), ' colspan="2"')
                 )
-                .n. tr(
+                .n.tr(
                     tda($btnRemove,$btnStyle)
                     . tda($btnInstall, $btnStyle)
                 )
-                .n. endTable();
+                .n.endTable();
 
         } else {
             // Prefs not installed
-            echo n. startTable()
-                .n. tr(tda(gTxt('smd_tag_prefs_not_installed'), ' colspan="2"'))
-                .n. tr(tda($btnInstall, $btnStyle))
-                .n. endTable();
+            echo n.startTable()
+                .n.tr(tda(gTxt('smd_tag_prefs_not_installed'), ' colspan="2"'))
+                .n.tr(tda($btnInstall, $btnStyle))
+                .n.endTable();
         }
     } else {
         // Tables not installed
-        echo n. startTable()
-            .n. tr(tda(strong(gTxt('smd_tag_prefs_some_tbl')).br.br
+        echo n.startTable()
+            .n.tr(tda(strong(gTxt('smd_tag_prefs_some_tbl')).br.br
                 .gTxt('smd_tag_prefs_some_explain').br.br
                 .gTxt('smd_tag_prefs_some_opts2'), ' colspan="2"')
             )
-            .n. tr(tda($btnInstallTbl, $btnStyle))
-            .n. endTable();
+            .n.tr(tda($btnInstallTbl, $btnStyle))
+            .n.endTable();
     }
 
     echo '</div>';
@@ -2561,29 +2561,29 @@ EOS
             // Prefs all installed
             echo '<form method="post" id="smd_syncit" action="?event=smd_tags&step=smd_tags_sync">'.
                 n.'<div class="txp-layout">'.
-                n. '<div class="txp-layout-2col">'.
-                n. hed(gTxt('smd_tag_sync_lbl').sp.$btnHelp, 1).
-                n. '</div>'.
-                n. '<div class="txp-layout-2col">'.
+                n.'<div class="txp-layout-2col">'.
+                n.'<h1 class="txp-heading">'.gTxt('smd_tag_sync_lbl').'</h1>'.
+                n.'</div>'.
+                n.'<div class="txp-layout-2col">'.
                 graf(
                     $btnManage
                     .n.$btnPrefs
                 , ' class="txp-actions"').
-            n. '</div>';
+            n.'</div>';
 
-            echo n. '<div id="smd_tag_report_pane">'
-                .n. '<div>'
-                .n. href('&#215;', '#close', ' class="smd_tags_btn_ok" role="button" title="'.gTxt('close').'" aria-label="'.gTxt('close').'"')
-                .n. '<h3>', gTxt('smd_tag_report_lbl'), '</h3>'
+            echo n.'<div id="smd_tag_report_pane">'
+                .n.'<div>'
+                .n.href('&#215;', '#close', ' class="smd_tags_btn_ok" role="button" title="'.gTxt('close').'" aria-label="'.gTxt('close').'"')
+                .n.'<h3>', gTxt('smd_tag_report_lbl'), '</h3>'
                 .$report
-                .n. '</div>'
-                .n. '</div>'
-                .n. '<div class="txp-layout-1col">';
+                .n.'</div>'
+                .n.'</div>'
+                .n.'<div class="txp-layout-1col">';
 
             $lblStyle = ' class="pref-label"';
 
             echo '<a id="smd_tags_report_toggler" href="#">'.gTxt('smd_tag_recent_report').'</a>';
-            echo '<section class="txp-prefs-group">';
+            echo '<section class="txp-tabs-vertical-group">';
             echo hed(gTxt('smd_tag_sync_plugin_opts'), 3);
             $rset = array();
 
@@ -2717,7 +2717,7 @@ EOS
 
             echo '</section>';
             echo hed(gTxt('smd_tag_sync_import_opts'), 3);
-            echo '<section class="txp-prefs-group">';
+            echo '<section class="txp-tabs-vertical-group">';
 
             // Assign to category
             if ($clink) {
@@ -2763,31 +2763,31 @@ EOS
         } elseif ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
             // Prefs possibly corrupt, or plugin updated
             echo startTable()
-                .n. tr(tda(strong(gTxt('smd_tag_prefs_some')).br.br
+                .n.tr(tda(strong(gTxt('smd_tag_prefs_some')).br.br
                     .gTxt('smd_tag_prefs_some_explain').br.br
                     .gTxt('smd_tag_prefs_some_opts1'), ' colspan="2"')
                 )
-                .n. tr(
+                .n.tr(
                     tda($btnRemove,$btnStyle)
                     . tda($btnInstall, $btnStyle)
                 )
-                .n. endTable();
+                .n.endTable();
         } else {
             // Prefs not installed
             echo startTable()
-                .n. tr(tda(gTxt('smd_tag_prefs_not_installed'), ' colspan="2"'))
-                .n. tr(tda($btnInstall, $btnStyle))
-                .n. endTable();
+                .n.tr(tda(gTxt('smd_tag_prefs_not_installed'), ' colspan="2"'))
+                .n.tr(tda($btnInstall, $btnStyle))
+                .n.endTable();
         }
     } else {
         // Tables not installed
         echo startTable()
-            .n. tr(tda(strong(gTxt('smd_tag_prefs_some_tbl')).br.br
+            .n.tr(tda(strong(gTxt('smd_tag_prefs_some_tbl')).br.br
                 .gTxt('psmd_tag_refs_some_explain').br.br
                 .gTxt('smd_tag_prefs_some_opts2'), ' colspan="2"')
             )
-            .n. tr(tda($btnInstallTbl, $btnStyle))
-            .n. endTable();
+            .n.tr(tda($btnInstallTbl, $btnStyle))
+            .n.endTable();
     }
 
     echo '</div>';
@@ -3680,7 +3680,7 @@ function smd_if_tag ($atts, $thing) {
 
     trace_add('[smd_if_tag equality tests: '. implode(', ', $eqtest) . ']');
     trace_add('[smd_if_tag search_mode tests: '. implode(', ', $searchtest) . ']');
-    trace_add('[smd_if_tag numeric tests: '.  print_r($nutest, true) . ']');
+    trace_add('[smd_if_tag numeric tests: '. print_r($nutest, true) . ']');
 
     // Init
     $out = $result = $numTests = 0;
@@ -4778,7 +4778,7 @@ Notes:
 
 h3. Performing actions on filtered tags
 
-While you are filtering the tags, you can perform a set of actions on all the visible tags. Simply enter some search criteria and, when you are happy with the presented list of tags, select one of the actions from the _With filtered_ dropdown.  You can multi-delete, assign a parent tag, or (if permitted) assign a linked category.
+While you are filtering the tags, you can perform a set of actions on all the visible tags. Simply enter some search criteria and, when you are happy with the presented list of tags, select one of the actions from the _With filtered_ dropdown. You can multi-delete, assign a parent tag, or (if permitted) assign a linked category.
 
 Choosing to _Assign parent_ or _Link to category_ presents a further dropdown. Select the parent tag/category to which you wish to assign the filtered tags. When you select _Go_ and confirm you are sure, the action will be applied to all selected tags.
 
