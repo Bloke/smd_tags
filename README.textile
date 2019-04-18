@@ -1,0 +1,5 @@
+h1. smd_tags
+
+"Download":https://github.com/Bloke/smd_tags/releases | "Packagist":https://packagist.org/packages/bloke/smd_tags
+
+A Textpattern CMS plugin for unlimited, structured taxonomy across content types.
