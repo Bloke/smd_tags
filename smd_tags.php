@@ -1384,14 +1384,14 @@ EOJS
                         case "smd_tag_p_master":
                         case "smd_tag_u_combi_and":
                         case "smd_tag_u_combi_or":
-                            $widget = fInput('text', $pnam, $pval, 'edit', '', '', 20, '', $pnam);
+                            $widget = fInput('text', $pnam, $pval, 'edit', '', '', 22, '', $pnam);
                             break;
                         case "smd_tag_t_mdelim":
                             $widget = fInput('text', $pnam, $pval, 'edit', '', '', 1, '', $pnam);
                             break;
                         case "smd_tag_p_qtpath":
                         case "smd_tag_p_qtstyl":
-                            $widget = fInput('text', $pnam, $pval, 'edit', '', '', 30, '', $pnam);
+                            $widget = fInput('text', $pnam, $pval, 'edit', '', '', INPUT_REGULAR, '', $pnam);
                             break;
                         case "smd_tag_t_auto":
                             $widget = onoffRadio($pnam, $pval);
