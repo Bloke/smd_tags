@@ -17,7 +17,7 @@ $plugin['name'] = 'smd_tags';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.70';
+$plugin['version'] = '0.7.0';
 $plugin['author'] = 'Stef Dawson';
 $plugin['author_uri'] = 'http://stefdawson.com/';
 $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and links';
@@ -5361,18 +5361,6 @@ bc. <txp:smd_tag_list showall="1" sort="name asc"
 </txp:smd_tag_list>
 
 Just take out the @flavour@ and @style@ attributes to render a regular alphabetic tag listing. Note that you could use @lettertitle@ but you would get both lower- and upper-case 'd' sections if you had tags 'Dastardly' and 'deviant'.
-
-h2(known-issues). Known issues
-
-Issue: Under Txp 4.6.x, the 'More...' link and the preference panel groups don't open/close. A JS error is thrown.
-Cause: Bug in Textpattern's @textpattern.js@ file.
-Fix: Edit the line that reads:
-
-bc. if (selectedTab === undefined) {
-
-and change it to:
-
-bc. if (typeof selectedTab === 'undefined') {
 
 h2(author). Author
 

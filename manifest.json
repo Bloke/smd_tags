@@ -1,0 +1,11 @@
+{
+  "name": "smd_tags",
+  "description": "Unlimited, semi-structured taxonomy across content types",
+  "version": "0.7.0",
+  "type": 5,
+  "author": "Stef Dawson",
+  "author_uri": "https://stefdawson.com/",
+  "order": 5,
+  "flags": 3,
+  "help": {"file" : ["./README.textile"]}
+}
