@@ -17,7 +17,7 @@ $plugin['name'] = 'smd_tags';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.60';
+$plugin['version'] = '0.70';
 $plugin['author'] = 'Stef Dawson';
 $plugin['author_uri'] = 'http://stefdawson.com/';
 $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and links';
@@ -258,6 +258,17 @@ if (!defined('SMD_TAGU')) {
     define("SMD_TAGU", 'smd_tags_used');
 }
 
+if (class_exists('\Textpattern\Tag\Registry')) {
+    Txp::get('\Textpattern\Tag\Registry')
+        ->register('smd_tag_list')
+        ->register('smd_tag_name')
+        ->register('smd_tag_count')
+        ->register('smd_tag_info')
+        ->register('smd_if_tag')
+        ->register('smd_if_tag_list')
+        ->register('smd_related_tags');
+}
+
 if (txpinterface === 'admin') {
     add_privs('smd_tags','1,2');
     add_privs('smd_tags_users','1,2,3,4,5,6');
@@ -291,16 +302,6 @@ if (txpinterface === 'admin') {
     register_callback('smd_tags_welcome', 'plugin_lifecycle.smd_tags');
     register_callback('smd_tags_inject_css', 'admin_side', 'head_end');
 } elseif (txpinterface === 'public') {
-    if (class_exists('\Textpattern\Tag\Registry')) {
-        Txp::get('\Textpattern\Tag\Registry')
-            ->register('smd_tag_list')
-            ->register('smd_tag_name')
-            ->register('smd_tag_count')
-            ->register('smd_tag_info')
-            ->register('smd_if_tag')
-            ->register('smd_if_tag_list')
-            ->register('smd_related_tags');
-    }
 //    register_callback('smd_tags_url_handler', 'pretext');
     smd_tags_url_handler();
 }
@@ -397,16 +398,19 @@ function smd_tags_users($evt, $stp)
 
 // ------------------------
 // Create dropdown and populate it with tags of the relevant type, highlighting any $sel tags
-function smd_multiTreeSelectInput($select_name = '', $tree = '', $sel = '') {
+function smd_multiTreeSelectInput($select_name = '', $tree = '', $sel = '')
+{
     $pref = smd_tags_pref_get(array('smd_tag_p_size', 'smd_tag_p_listpar'), 1);
     $rows = $pref['smd_tag_p_size']['val'];
     $incl = $pref['smd_tag_p_listpar']['val'];
 
     $out[] = '<select id="'.$select_name.'" name="'.$select_name.'[]" class="list" size="'. $rows .'"' .(($rows==1) ? '' : ' multiple="multiple"'). '>';
+
     foreach ($tree as $leaf) {
         if ($leaf['name'] == 'root') continue;
 
         $selected='';
+
         foreach ($sel as $gid => $item) {
             if ($leaf['id'] == $item['tag_id']) {
                 $selected = ' selected="selected"';
@@ -419,13 +423,16 @@ function smd_multiTreeSelectInput($select_name = '', $tree = '', $sel = '') {
         $selectable = (!$incl && $leaf['children'] > 0) ? ' disabled="disabled"' : '';
         $out[] = t.'<option value="'.$leaf['id'].'"'.$selected.$selectable.'>'.$indent.htmlspecialchars($leaf['title']).'</option>';
     }
+
     $out[] = '</select>';
+
     return join('',$out);
 }
 
 // ------------------------
 // Called whenever one of the 4 main tabs are used on the admin side. Inserts the input method if required
-function smd_tags_loadlist($evt, $stp) {
+function smd_tags_loadlist($evt, $stp)
+{
     global $app_mode, $step;
 
     if (smd_tags_table_exist()) {
@@ -669,7 +676,8 @@ EOJS
 
 // ------------------------
 // Update the tags used table if some tags have been added/saved
-function smd_tags_savelist($evt, $stp) {
+function smd_tags_savelist($evt, $stp)
+{
     if (smd_tags_table_exist()) {
         $ctrls = smd_tags_pref_get(array('smd_tag_p_qtag', 'smd_tag_p_input', 'smd_tag_p_linkcat', 'smd_tag_p_master'), 1);
         $quick = $ctrls['smd_tag_p_qtag']['val'];
@@ -687,12 +695,14 @@ function smd_tags_savelist($evt, $stp) {
             // button was hit
             $stp = (ps('publish')) ? 'publish' : $stp;
             $saveSteps = array('create', 'publish', 'image_save', 'file_save', 'link_save', 'link_post');
+
             if (ps('save') || in_array($stp, $saveSteps)) {
                 safe_delete(SMD_TAGU, 'item_id="'.$itemID.'" AND type="'.$evt.'"');
 
                 $tags = ps('smd_tag_parent') ? ps('smd_tag_parent') : array();
 
                 $allowedTags = array();
+
                 if ($god_clause) {
                     $allowedTags = safe_column('id', SMD_TAG, "type='$evt'" . $god_clause);
                 }
@@ -708,14 +718,17 @@ function smd_tags_savelist($evt, $stp) {
                             $allowedTags[] = $row['id'];
                         }
                     }
+
                     $tags = array_intersect(array_unique($allowedTags), $tags);
                 }
 
                 $vals = array();
-                foreach($tags as $val){
+
+                foreach ($tags as $val){
                     safe_insert(SMD_TAGU, 'tag_id = "'.$val.'", item_id="'.$itemID.'", type="'.$evt.'"');
                     $vals[] = $val;
                 }
+
                 $tagsText = preg_split("/,\s+?/", ps('smd_tags_bytext'));
 
                 // If we're in non-STRICT mode and there are any typed tags that are not in the select list, check they exist and make links to them
@@ -724,7 +737,7 @@ function smd_tags_savelist($evt, $stp) {
                     $tagsText = array_diff($tagsText, $added);
 
                     // Only loop over tags that don't appear to be already defined
-                    foreach($tagsText as $tag) {
+                    foreach ($tagsText as $tag) {
                         if ($tag == "") continue;
                         $exists = safe_field('id', SMD_TAG, "name = '$tag' AND type = '$evt'"); // 1st check
 
@@ -740,18 +753,24 @@ function smd_tags_savelist($evt, $stp) {
                                 $tagparent = 'root';
                                 $tagchild = $tagBits[0];
                             }
+
                             $sanitag = strtolower(sanitizeForUrl($tagchild));
                             $already = safe_field('id', SMD_TAG, "name = '$sanitag' AND type = '$evt'"); // Check again because parent-->child will fail 1st check
+
                             if ($already === false) {
                                 $exists = safe_insert(SMD_TAG, "name='".$sanitag."', title='$tagchild', parent='$tagparent', type='$evt'");
                             }
+
                             $catfield = ($evt=="article") ? gps('Category1') : gps('category');
+
                             if ($clink && $catfield && $exists) {
                                 // Assign new tag to current category (cat1 for articles)
                                 $catid = safe_insert(SMD_TAGC,"tag_id='$exists', cat_id=(SELECT id FROM ".PFX."txp_category WHERE name='$catfield' AND type='$evt')");
                             }
+
                             rebuild_tree_full($evt, SMD_TAG);
                         }
+
                         if ($exists) {
                             safe_insert(SMD_TAGU, 'tag_id = "'.$exists.'", item_id="'.$itemID.'", type="'.$evt.'"');
                         }
@@ -764,7 +783,8 @@ function smd_tags_savelist($evt, $stp) {
 
 // ------------------------
 // Handle changes to the tags table during multi-item edits
-function smd_tags_multi_edit($evt, $stp) {
+function smd_tags_multi_edit($evt, $stp)
+{
     // In Txp 4.0.6 the only tabs to allow multi-edits are the Article (list) and Link tabs. Cheat for now
     if (smd_tags_table_exist()) {
         switch ($evt) {
@@ -796,6 +816,7 @@ function smd_tags_multi_edit($evt, $stp) {
                     break;
             }
         }
+
         return '';
     }
 }
@@ -986,7 +1007,8 @@ function smd_tags_get_prefs($type)
 }
 
 // ------------------------
-function smd_tags_table_exist($all='0') {
+function smd_tags_table_exist($all = '0')
+{
     static $smd_tags_table_ok = array();
 
     if (isset($smd_tags_table_ok[$all])) {
@@ -1019,7 +1041,8 @@ function smd_tags_table_exist($all='0') {
 
 // ------------------------
 // Add tag tables if not already installed
-function smd_tags_table_install($showpane='1') {
+function smd_tags_table_install($showpane = '1')
+{
     global $DB;
 
     $debug = gps('debug');
@@ -1060,9 +1083,10 @@ function smd_tags_table_install($showpane='1') {
         PRIMARY KEY (`item_id`,`tag_id`)
     ) ENGINE=MyISAM CHARACTER SET=utf8";
 
-    if($debug) {
+    if ($debug) {
         dmp($sql);
     }
+
     foreach ($sql as $qry) {
         $ret = safe_query($qry);
         if ($ret===false) {
@@ -1103,28 +1127,34 @@ function smd_tags_table_install($showpane='1') {
 
 // ------------------------
 // Drop tag tables if in database
-function smd_tags_table_remove() {
+function smd_tags_table_remove()
+{
     global $DB;
 
     $ret = '';
     $sql = array();
     $GLOBALS['txp_err_count'] = 0;
+
     if (smd_tags_table_exist()) {
         $sql[] = "DROP TABLE IF EXISTS " .PFX.SMD_TAG. "; ";
         $sql[] = "DROP TABLE IF EXISTS " .PFX.SMD_TAGU. "; ";
         $sql[] = "DROP TABLE IF EXISTS " .PFX.SMD_TAGC. "; ";
-        if(gps('debug')) {
+
+        if (gps('debug')) {
             dmp($sql);
         }
+
         foreach ($sql as $qry) {
             $ret = safe_query($qry);
-            if ($ret===false) {
+
+            if ($ret === false) {
                 $GLOBALS['txp_err_count']++;
                 echo "<b>" . $GLOBALS['txp_err_count'] . ".</b> " . mysqli_error($DB->link) . "<br />\n";
                 echo "<!--\n $qry \n-->\n";
             }
         }
     }
+
     if ($GLOBALS['txp_err_count'] == 0) {
         $message = gTxt('smd_tag_tbl_removed');
         smd_tags_prefs_remove($message);
@@ -1133,20 +1163,25 @@ function smd_tags_table_remove() {
         smd_tags_prefs_show($message);
     }
 }
+
 // ------------------------
 // Rebuild modified preorder tag links
-function smd_tags_table_rebuild() {
+function smd_tags_table_rebuild()
+{
     $types = array('article', 'image', 'file', 'link');
+
     foreach ($types as $tag_type) {
         rebuild_tree_full($tag_type, SMD_TAG);
     }
+
     $message = gTxt('smd_tag_tbl_rebuilt');
     smd_tags_prefs_show($message);
 }
 
 // ------------------------
 // Add plugin preferences to prefs
-function smd_tags_prefs_install($message = '', $showpane = '1') {
+function smd_tags_prefs_install($message = '', $showpane = '1')
+{
     $smd_tag_prefs = smd_tags_get_prefs('nameval');
 
     $ctr = safe_count('txp_prefs', 'event="smd_tags"') + 1;
@@ -1173,7 +1208,8 @@ function smd_tags_prefs_install($message = '', $showpane = '1') {
 
 // ------------------------
 // Remove plugin preferences from prefs table.
-function smd_tags_prefs_remove($message = '', $showpane = '1') {
+function smd_tags_prefs_remove($message = '', $showpane = '1')
+{
     $smd_tag_prefs = array_merge(smd_tags_get_prefs('name'), smd_tags_get_prefs('old'));
 
     foreach ($smd_tag_prefs as $pref) {
@@ -1188,7 +1224,8 @@ function smd_tags_prefs_remove($message = '', $showpane = '1') {
 
 // ------------------------
 // Saves plugin preferences
-function smd_tags_prefs_update($message = '') {
+function smd_tags_prefs_update($message = '')
+{
     $smd_tag_prefs = smd_tags_get_prefs('name');
 
     $post = doSlash(stripPost());
@@ -1206,12 +1243,13 @@ function smd_tags_prefs_update($message = '') {
 // ------------------------
 // Split a multi-char preference value into an array of keys/values.
 // Note: value is passed in and not read directly from the prefs array in this function - intentionally
-function smd_tags_pref_explode($val) {
+function smd_tags_pref_explode($val)
+{
     $order = array_values(array(gTxt('tab_list'),gTxt('tab_image'),gTxt('tab_file'),gTxt('tab_link')));
     $onoff = array_values(preg_split('//', $val, -1, PREG_SPLIT_NO_EMPTY));
     $out = array();
 
-    foreach($order as $key1 => $value1) {
+    foreach ($order as $key1 => $value1) {
         $out[(string)$value1] = $onoff[$key1];
     }
 
@@ -1221,7 +1259,8 @@ function smd_tags_pref_explode($val) {
 // ------------------------
 // Get values from prefs - pass either a single key or an array.
 // If 2nd arg is set and the pref doesn't exist, read it from the plugin default
-function smd_tags_pref_get($keys, $dflt = 0) {
+function smd_tags_pref_get($keys, $dflt = 0)
+{
     static $smd_tag_prefstore;
 
     $smd_tag_prefs = smd_tags_get_prefs('nameval');
@@ -1246,7 +1285,7 @@ function smd_tags_pref_get($keys, $dflt = 0) {
         $prefkeys = doQuote(join("','",doSlash($keys)));
         $rs = safe_rows('name,val,html','txp_prefs','name IN ('.$prefkeys.') ORDER BY name');
 
-        foreach($rs as $pref) {
+        foreach ($rs as $pref) {
             $smd_tag_prefstore[$pref['name']] = $prefout[$pref['name']] = array_slice($pref, 1);
         }
     }
@@ -1264,7 +1303,8 @@ function smd_tags_pref_get($keys, $dflt = 0) {
 
 // ------------------------
 // Common buttons on the admin panel
-function smd_tags_buttons() {
+function smd_tags_buttons()
+{
     $ret = array (
         'btnPrefsSave' => fInput('submit', 'submit', gTxt('save'), 'publish'),
         'btnInstallTbl' => sLink('smd_tags', 'smd_tags_table_install', '<span class="ui-icon ui-extra-icon-upload"></span> '.gTxt('smd_tag_tbl_install_lbl')),
@@ -1287,7 +1327,8 @@ function smd_tags_buttons() {
 
 // ------------------------
 // A stub that can be called from a Txp event
-function smd_tags_setup($evt='', $stp='', $message='') {
+function smd_tags_setup($evt = '', $stp = '', $message = '')
+{
     smd_tags_prefs_show();
 }
 
@@ -1366,7 +1407,7 @@ EOJS
                     $label = '<label for="'.$pnam.'">'.gTxt($pnam).'</label>';
                     $widget = '';
 
-                    switch($pnam) {
+                    switch ($pnam) {
                         case "smd_tag_p_enable":
                             $options = smd_tags_pref_explode($pval);
                             foreach ($options as $opt => $onoff) {
@@ -2007,7 +2048,8 @@ EOJS
 
 // ------------------------
 // Store the tag that is currently being edited/created
-function smd_tag_save() {
+function smd_tag_save()
+{
     // Defer doSlash of description until after Textile's had a go
     extract(doSlash(gpsa(array('smd_tag_oname', 'smd_tag_name', 'smd_tag_title', 'smd_tag_parent', 'smd_tag_cat', 'smd_tag_type', 'smd_tag_id'))));
     include_once txpath.'/publish.php'; // for parse()
@@ -2130,7 +2172,8 @@ function smd_tag_save() {
 
 // ------------------------
 // Store new tag - uses smd_tag_save without the ID/old_name
-function smd_tag_create() {
+function smd_tag_create()
+{
 //  extract(doSlash(gpsa(array('smd_tag_name', 'smd_tag_title', 'smd_tag_description', 'smd_tag_parent', 'smd_tag_type'))));
     unset($_POST['smd_tag_id']);
     smd_tag_save();
@@ -2139,7 +2182,8 @@ function smd_tag_create() {
 // ------------------------
 // Check if the passed tag exists.
 // Return its ID if it does or insert it if it doesn't. Optionally assign it to a parent tag / Txp category
-function smd_tag_getsert($tag_name, $tag_type, $tag_title='', $tag_parent='', $tag_cat='', $tag_desc='', $force_parent=false, $force_cat=false) {
+function smd_tag_getsert($tag_name, $tag_type, $tag_title = '', $tag_parent = '', $tag_cat = '', $tag_desc = '', $force_parent = false, $force_cat = false)
+{
     $ctrls = smd_tags_pref_get(array('smd_tag_p_linkcat'), 1);
     $clink = $ctrls['smd_tag_p_linkcat']['val'];
     $tag_title = ($tag_title == '') ? $tag_name : $tag_title;
@@ -2154,13 +2198,14 @@ function smd_tag_getsert($tag_name, $tag_type, $tag_title='', $tag_parent='', $t
     if (!$ret) {
         $ret = safe_insert(SMD_TAG, "name='".$tag_name."', title='$tag_title', parent='$tag_parent', type='$tag_type', description='$tag_desc', desc_html='$tag_desc'");
         rebuild_tree_full($tag_type, SMD_TAG);
-    } elseif($force_parent) {
+    } elseif ($force_parent) {
         $upd = safe_update(SMD_TAG, "parent='$tag_parent'", "id='".doSlash($ret)."'");
         rebuild_tree_full($tag_type, SMD_TAG);
     }
 
     // Assign tag to category if required
     $ret = doSlash($ret);
+
     if ($clink && $tag_cat) {
         $catid = safe_field('cat_id', SMD_TAGC, "tag_id='$ret'");
 
@@ -2169,7 +2214,7 @@ function smd_tag_getsert($tag_name, $tag_type, $tag_title='', $tag_parent='', $t
             $catid = false;
         }
 
-        if(!$catid) {
+        if (!$catid) {
             safe_insert(SMD_TAGC, "tag_id='$ret', cat_id=(SELECT id FROM ".PFX."txp_category WHERE name='$tag_cat' AND type='$tag_type')");
         }
     }
@@ -2179,7 +2224,8 @@ function smd_tag_getsert($tag_name, $tag_type, $tag_title='', $tag_parent='', $t
 
 // ------------------------
 // Link the passed tags array with the given item ID
-function smd_tag_link($itemid, $tagarr, $tag_type) {
+function smd_tag_link($itemid, $tagarr, $tag_type)
+{
     assert_int($itemid);
 
     // TODO: Remove any existing tags?? Perhaps make this an option?
@@ -2206,7 +2252,8 @@ function smd_tag_link($itemid, $tagarr, $tag_type) {
 
 // ------------------------
 // Delete the given tag(s). Respects noclobber/tree/orphans depending on prefs
-function smd_tags_delete() {
+function smd_tags_delete()
+{
     extract(doSlash(gpsa(array('smd_tag_id', 'smd_tag_name', 'smd_tag_type'))));
 
     $message = $msgExtra = $report = '';
@@ -2258,9 +2305,11 @@ function smd_tags_delete() {
     // Make a note of what we're about to do for the report
     $all_dels = safe_rows('id, name', SMD_TAG, "id IN (" . join(',', quote_list($to_del)) . ")");
     $all_names = array();
+
     foreach ($all_dels as $aname) {
         $all_names[$aname['id']] = $aname['name'];
     }
+
     foreach ($to_del as $delid) {
         if (isset($all_names[$delid])) {
             $ok[] = $all_names[$delid];
@@ -2270,6 +2319,7 @@ function smd_tags_delete() {
     // First get rid of the direct tags
     $where = " IN ('".join("','", $to_del)."')";
     $ret = safe_delete(SMD_TAG, 'id'.$where." AND type='$smd_tag_type'");
+
     if ($ret) {
         if (!$delt) {
             // Promote the orphans if required
@@ -2311,20 +2361,24 @@ function smd_tags_delete() {
 
 // ------------------------
 // Make the passed tag a child of the given parent (if possible)
-function smd_tag_assign_parent($parid, $childid, $tag_type, $childnam, $rebuild = true) {
+function smd_tag_assign_parent($parid, $childid, $tag_type, $childnam, $rebuild = true)
+{
     assert_int($childid);
     assert_int($parid);
     $status = array();
+
     if ($childid == $parid) {
         $status[] = 'err_self_parent';
     } else {
         $exists = safe_field('name', SMD_TAG, "id = '".doSlash($parid)."' AND type = '".doSlash($tag_type)."'");
         $exists = ($exists == '') ? 'root' : $exists;
         $ret = safe_update(SMD_TAG, "parent='".doSlash($exists)."'", "id='".$childid."'");
+
         if ($rebuild) {
             // Doesn't hurt to rebuild it anyway, even if the assignment fails
             rebuild_tree_full($tag_type, SMD_TAG);
         }
+
         if ($ret) {
             $status[] = 'parent_linked';
         } else {
@@ -2340,7 +2394,8 @@ function smd_tag_assign_parent($parid, $childid, $tag_type, $childnam, $rebuild 
 // Assign a parent to a bunch of tags at once
 // Cheating code really; just calls the smd_tag_assign_parent for each tag but delays the
 // tree rebuild until the end for speed
-function smd_tags_multi_set_parent() {
+function smd_tags_multi_set_parent()
+{
     extract(doSlash(gpsa(array('smd_tag_type', 'smd_tag_id', 'smd_tag_name', 'smd_tag_extra'))));
 
     $message = $report = '';
@@ -2364,6 +2419,7 @@ function smd_tags_multi_set_parent() {
         $parnam = ($parnam == '') ? 'root' : $parnam ;
         $report = gTxt('smd_tag_parent_linked_lbl', array('{parent}' => $parnam)).join(', ', $ok).'.';
     }
+
     if ($notok) {
         $msgs = array();
         foreach ($notok as $idx => $reasons) {
@@ -2384,7 +2440,8 @@ function smd_tags_multi_set_parent() {
 
 // ------------------------
 // Links the passed tag with the given category
-function smd_tag_assign_category($parnam, $childid, $cat_type, $childnam) {
+function smd_tag_assign_category($parnam, $childid, $cat_type, $childnam)
+{
     assert_int($childid);
     $status = array();
 
@@ -2394,9 +2451,11 @@ function smd_tag_assign_category($parnam, $childid, $cat_type, $childnam) {
         $status[] = 'category_unlinked';
     } else {
         $exists = safe_field('id', 'txp_category', "name = '".doSlash($parnam)."' AND type = '".doSlash($cat_type)."'");
+
         if ($exists) {
             safe_delete(SMD_TAGC, "tag_id='".doSlash($childid)."'");
             $ret = safe_insert(SMD_TAGC, "cat_id='".doSlash($exists)."', tag_id = '".doSlash($childid)."'");
+
             if ($ret) {
                 $status[] = 'category_linked';
             } else {
@@ -2404,6 +2463,7 @@ function smd_tag_assign_category($parnam, $childid, $cat_type, $childnam) {
             }
         }
     }
+
     return $status;
 }
 
@@ -2411,7 +2471,8 @@ function smd_tag_assign_category($parnam, $childid, $cat_type, $childnam) {
 // ------------------------
 // Assign a bunch of tags to a category
 // Cheatingly calls smd_tag_assign_category multiple times
-function smd_tags_multi_catlink() {
+function smd_tags_multi_catlink()
+{
     extract(doSlash(gpsa(array('smd_tag_type', 'smd_tag_id', 'smd_tag_name', 'smd_tag_extra'))));
 
     $message = $report = '';
@@ -2423,6 +2484,7 @@ function smd_tags_multi_catlink() {
     foreach ($theList as $idx => $name) {
         $row = safe_row('*', SMD_TAG, "id='".doSlash($idx)."'");
         $rs = safe_rows('id, name', SMD_TAG, "type = '".doSlash($smd_tag_type)."' AND (lft BETWEEN " .$row['lft']. " AND " .$row['rgt']. ")");
+
         if ($rs) {
             foreach ($rs as $rec) {
                 $theList[$rec['id']] = $rec['name'];
@@ -2432,6 +2494,7 @@ function smd_tags_multi_catlink() {
 
     foreach ($theList as $idx => $name) {
         $status = smd_tag_assign_category($smd_tag_extra, $idx, $smd_tag_type, $name);
+
         if (in_array('category_linked', $status)) {
             $ok[] = $name;
         } elseif (in_array('category_unlinked', $status)) {
@@ -2442,6 +2505,7 @@ function smd_tags_multi_catlink() {
     if ($ok) {
         $report = gTxt('smd_tag_category_linked_lbl', array('{category}' => $smd_tag_extra)).join(', ', $ok).'.';
     }
+
     if ($notok) {
         $msgs = array();
         foreach ($notok as $idx => $reasons) {
@@ -2798,7 +2862,8 @@ EOS
 
 // ------------------------
 // Import tags from other places
-function smd_tags_import($smd_tag_options) {
+function smd_tags_import($smd_tag_options)
+{
     extract($smd_tag_options);
 
     $message = '';
@@ -2814,6 +2879,7 @@ function smd_tags_import($smd_tag_options) {
     echo "var ictr = 0; var itot = {$total}; var lnk_ctr = 0;";
     echo 'jQuery(function() {';
     echo 'jQuery("#smd_tags_import_itot").text("/'.$total.'");';
+
     if ($rs) {
         foreach ($rs as $row) {
             switch ($smd_tags_sync_type) {
@@ -2831,8 +2897,10 @@ function smd_tags_import($smd_tag_options) {
                     $idata = (($smd_tags_sync_cfs && isset($row['custom_'.$smd_tags_sync_cfs])) ? doSlash($row['custom_'.$smd_tags_sync_cfs]) : '');
                     break;
             }
+
             $ititle = doSlash($row['Title']);
             $artid = doSlash($row['ID']);
+
             echo <<<EOJS
             sendAsyncEvent(
             {
@@ -2853,6 +2921,7 @@ function smd_tags_import($smd_tag_options) {
             }, smd_tags_group_feedback);
 EOJS;
         }
+
         echo '});';
         echo <<<EOJS
         function smd_tags_group_feedback(data) {
@@ -2871,7 +2940,8 @@ EOJS;
 }
 
 // ------------------------
-function smd_tags_import_one() {
+function smd_tags_import_one()
+{
     $smd_tags_sync_type = gps('smd_tags_sync_type');
     $smd_tags_sync_data = gps('smd_tags_sync_data');
     $smd_tags_sync_id = gps('smd_tags_sync_id');
@@ -2891,6 +2961,7 @@ function smd_tags_import_one() {
         // tru_tags / Txp CF
         $dlm = ($smd_tags_sync_type == '3' && $smd_tags_sync_cfs_delim) ? $smd_tags_sync_cfs_delim : ',';
         $keys = do_list($smd_tags_sync_data, $dlm);
+
         foreach ($keys as $key) {
             if ($key=='') continue;
             $keylist[] = array('name' => $key, 'title' => $key);
@@ -2916,6 +2987,7 @@ function smd_tags_import_one() {
         if ($itn == '' || $itn == NULL || $itt == '' || $itt == NULL) continue;
 
         $id = smd_tag_getsert($itn, 'article', $itt, $smd_tags_import_tag_parent, $smd_tags_import_cat_parent, '', $smd_tags_import_force_parent, $smd_tags_import_force_cat);
+
         if ($id) {
             $tag_ids[] = $id;
             $tag_names[] = $itn;
@@ -2924,6 +2996,7 @@ function smd_tags_import_one() {
 
     if ($tag_ids) {
         $report = strong($smd_tags_sync_title).': '.join(', ', $tag_names).br;
+
         if ($smd_tags_delete_orig) {
             if ($smd_tags_sync_type == '0') {
                 safe_update('textpattern', "Keywords=''", "id='".doSlash($smd_tags_sync_id)."'");
@@ -2936,6 +3009,7 @@ function smd_tags_import_one() {
             }
         }
     }
+
     $tag_ctr = smd_tag_link($smd_tags_sync_id, $tag_ids, 'article');
     send_xml_response(array('smd_tags_report' => $report, 'smd_tags_link_ctr' => $tag_ctr));
 }
@@ -2950,7 +3024,8 @@ function smd_tags_import_one() {
 //  * excluding forbidden items (e.g. when assigning parent to tag that is already in the subtree)
 //  * adding interface elements like [clr] and [tog] buttons
 // TODO: take the bi-directional setting into account
-function smd_tag_parentlist() {
+function smd_tag_parentlist()
+{
     $trycat = isset($_POST['cat']);
     extract(doSlash(gpsa(array('name', 'type', 'id', 'cat', 'itemid', 'listonly', 'html_id', 'link_mode'))));
 
@@ -2969,7 +3044,7 @@ function smd_tag_parentlist() {
     $incl = $pref['smd_tag_p_listpar']['val'];
     $god = $pref['smd_tag_p_master']['val'];
     $clink = $pref['smd_tag_p_linkcat']['val'];
-   $god_clause = ($god == '') ? '' : "txt.parent = '" . doSlash($god) . "'";
+    $god_clause = ($god == '') ? '' : "txt.parent = '" . doSlash($god) . "'";
 
     if ($cat && $clink) {
        $cat = do_list($cat);
@@ -2980,6 +3055,7 @@ function smd_tag_parentlist() {
             AND  txl.cat_id = txc.id
             AND txc.name IN ('" .join("','", $cat). "') )" . ($god_clause ? ' OR '.$god_clause : '') . ")
             AND txt.type = '$type'");
+
         if ($rsc) {
             foreach ($rsc as $row) {
                 $include_parent = ($incl || $row['parent'] == $god) ? '' : ' AND lft != '.$row['lft'];
@@ -2987,6 +3063,7 @@ function smd_tag_parentlist() {
                 $rsid = array_merge($rsid, $ids);
             }
         }
+
         $cat = ($rsc) ? ' AND id IN ('.doQuote(join("','",$rsid)).')' : '';
     } elseif ($god != '' && $link_mode == '1') {
         $ids = safe_column('id', SMD_TAG, "type = '$type' AND parent = '" . doSlash($god) . "'");
@@ -3014,13 +3091,16 @@ function smd_tag_parentlist() {
     } else {
         echo gTxt('smd_tag_no_parent');
     }
+
     exit(); // Don't call page_end()
 }
 
 // ------------------------
 // Grab a valid category list
-function smd_tag_catlist($cat='') {
+function smd_tag_catlist($cat = '')
+{
     extract(doSlash(gpsa(array('name','type','html_id'))));
+
     while(@ob_end_clean()); // Get rid of any page so far
 
     $type = ($type == "" || $type == "undefined") ? 'article' : $type;
@@ -3032,14 +3112,17 @@ function smd_tag_catlist($cat='') {
     } else {
         echo gTxt('no_categories_available');
     }
+
     exit(); // Don't call page_end()
 }
 
 // ------------------------
 // Fetch a description for use as a tooltip
-function smd_tag_get_desc() {
+function smd_tag_get_desc()
+{
     extract(doSlash(gpsa(array('tag_ref'))));
-    while(@ob_end_clean()); // Get rid of any page so far
+
+    while (@ob_end_clean()); // Get rid of any page so far
 
     $tag_ref = ($tag_ref == "" || $tag_ref == "undefined") ? '' : $tag_ref;
 
@@ -3056,13 +3139,15 @@ function smd_tag_get_desc() {
 
 // ------------------------
 // Remove empty URL elements (used as callback to array_filter())
-function smd_tags_remove_empty($var) {
-    return($var != '');
+function smd_tags_remove_empty($var)
+{
+    return ($var != '');
 }
 
 // ------------------------
 // Handle fake tag section URL
-function smd_tags_url_handler($evt = null, $stp = null) {
+function smd_tags_url_handler($evt = null, $stp = null)
+{
     global $smd_tag_type, $permlink_mode;
 
     if (!smd_tags_table_exist()) {
@@ -3081,16 +3166,20 @@ function smd_tags_url_handler($evt = null, $stp = null) {
     $qs = strpos($req, '?');
     $qatts = ($qs ? a.substr($req, $qs + 1) : '');
 
-    if ($qs) $req = substr($req, 0, $qs);
+    if ($qs) {
+        $req = substr($req, 0, $qs);
+    }
+
     $parts = array_values(array_filter(explode('/', $req), 'smd_tags_remove_empty'));
-    $validTypes = array('article','image','file','link');
+    $validTypes = array('article', 'image', 'file', 'link');
 
     // Deal with clean URL syntax first, trying to avoid clashes with built-in permlink schemes.
     if (count($parts) > 1) {
         // Determine if this URL is one we care about.
         // If so, find where the tag portion begins (immediately after the trigger).
         $pos = false;
-        foreach($urlsec as $trigger) {
+
+        foreach ($urlsec as $trigger) {
             if (($pos = array_search($trigger, $parts)) !== false) {
                 $pos++; // Start of the tag info
                 break;
@@ -3100,6 +3189,7 @@ function smd_tags_url_handler($evt = null, $stp = null) {
         if ($pos !== false) {
             // Try to detect section/id/title permlink scheme
             $sit = false;
+
             if (count($parts) == 3) {
                 // Note that '0' is not a valid article ID but is numeric and could be the name of a tag, so it needs special treatment
                 if (is_numeric($parts[1]) && $parts[1] != '0') {
@@ -3136,7 +3226,8 @@ function smd_tags_url_handler($evt = null, $stp = null) {
 }
 
 // ------------------------
-function smd_tags_set($typ, $tag='', $item='') {
+function smd_tags_set($typ, $tag = '', $item = '')
+{
     global $smd_tags;
 
     $smd_tags = array();
@@ -3150,6 +3241,7 @@ function smd_tags_set($typ, $tag='', $item='') {
     if ($tag) {
         $taglist = explode($cor, $tag);
         $num_or = count($taglist);
+
         if ($num_or == 1) {
             // Only one item in the exploded list could mean one of two things:
             //  a) only one item(!)
@@ -3208,7 +3300,8 @@ function smd_tags_set($typ, $tag='', $item='') {
 }
 
 // ------------------------
-function smd_tags_populate($rs, $typ) {
+function smd_tags_populate($rs, $typ)
+{
     global $smd_tags;
 
     while ($row = nextRow($rs)) {
@@ -3227,7 +3320,8 @@ function smd_tags_populate($rs, $typ) {
 // ------------------------
 // Add tags to the global scope, depending on context.
 // Returns the current context
-function smd_tags_context() {
+function smd_tags_context()
+{
     global $thisarticle, $thisfile, $thislink, $thisimage, $smd_tag_type, $smd_tag_items, $smd_tags, $smd_thistag;
 
     $ctxt = $smd_tag_type;
@@ -3236,6 +3330,7 @@ function smd_tags_context() {
 
     // Individual article or list
     $id = '';
+
     if (!empty($thisimage)) {
         $id = $thisimage['id'];
         $ctxt = 'image';
@@ -3259,7 +3354,7 @@ function smd_tags_context() {
     }
 
     if (isset($smd_tags[$ctxt])) {
-        foreach($smd_tags[$ctxt] as $rid => $row) {
+        foreach ($smd_tags[$ctxt] as $rid => $row) {
             if (is_int($rid)) {
                 $ids[] = $rid;
             }
@@ -3276,8 +3371,10 @@ function smd_tags_context() {
 
 // ------------------------
 // Load current tag into global scope
-function smd_tag_populate($row) {
+function smd_tag_populate($row)
+{
     global $smd_thistag;
+
     $smd_thistag['tag_id'] = $row['id'];
     $smd_thistag['tag_name'] = $row['name'];
     $smd_thistag['tag_lettername'] = smd_tags_utf8_substr($row['name'], 0, 1);
@@ -3296,10 +3393,13 @@ function smd_tag_populate($row) {
 }
 
 // Thanks http://us2.php.net/manual/en/function.substr.php
-function smd_tags_utf8_substr($str, $start) {
+function smd_tags_utf8_substr($str, $start)
+{
     preg_match_all("/./u", $str, $ar);
-    if(func_num_args() >= 3) {
+
+    if (func_num_args() >= 3) {
         $end = func_get_arg(2);
+
         return join('',array_slice($ar[0],$start,$end));
     } else {
         return join('',array_slice($ar[0],$start));
@@ -3308,8 +3408,10 @@ function smd_tags_utf8_substr($str, $start) {
 
 // ------------------------
 // All tags/counts
-function smd_tag_list_adm($atts) {
+function smd_tag_list_adm($atts)
+{
     include_once txpath.'/publish/taghandlers.php';
+
     extract(lAtts(array(
         'type'       => 'article',
         'indent'     => '&#160;&#160;',
@@ -3320,7 +3422,7 @@ function smd_tag_list_adm($atts) {
         'break'      => '',
         'class'      => __FUNCTION__,
         'breakclass' => '',
-    ),$atts));
+    ), $atts));
 
     $validTypes = array('list' => 'article', 'image' => 'image', 'file' => 'file', 'link' => 'link');
     $rs = smd_tag_tree('root', $type, '1=1', SMD_TAG);
@@ -3328,6 +3430,7 @@ function smd_tag_list_adm($atts) {
             FROM ".PFX.SMD_TAG." AS txt, ".PFX.SMD_TAGC." AS txl, ".PFX."txp_category AS txc
             WHERE txt.type = '$type' AND txt.id = txl.tag_id AND txl.cat_id = txc.id");
     $rscout = array();
+
     if ($rsc) {
         foreach ($rsc as $idx => $row) {
             $rscout[$row['tag_id']] = $row['name'];
@@ -3355,6 +3458,7 @@ function smd_tag_list_adm($atts) {
             extract($row);
             $parent = (isset($parent)) ? $parent : ''; // Parent might not be defined
             $row['type'] = $type;
+
             if (isset($totals[$id])) {
                 $row['count'] = $totals[$id][0];
                 $ev = array_keys($validTypes,$type);
@@ -3389,6 +3493,7 @@ function smd_tag_list_adm($atts) {
                 $step = 1;
                 $cols = 1;
                 $numopts = count($wrapit);
+
                 // Each successive level overrides the previous step so by the end of the ifs,
                 // 3 values are set up: step, rows and cols
                 if ($numopts > 1) {
@@ -3482,22 +3587,26 @@ function smd_tag_list_adm($atts) {
                 $listout = array();
                 $itemCtr = 0;
                 $class = (!empty($class)) ? ' class="'.$class.'"' : '';
-
                 $prevel = 0;
+
                 foreach ($out as $item) {
                     $bclass = join(' ', array_merge($item['class'], array($breakclass)));
                     $bclass = (!empty($bclass)) ? ' class="'.$bclass.'"' : '';
+
                     if ($prevel >= $item['level'] && $item['level'] <= $level) {
                         if ($itemCtr > 0) {
                             $listout[] = '</ul>';
                         }
                         $listout[] = "<ul>";
                     }
+
                     $listout[] = '<li'.$bclass.'>'.$item['data'].'</li>';
                     $prevel = $item['level'];
+
                     if ($itemCtr >= $totalItems-1) {
                         $listout[] = '</ul>';
                     }
+
                     $itemCtr++;
                 }
 
@@ -3508,13 +3617,15 @@ function smd_tag_list_adm($atts) {
                 return doLabel($label, $labeltag).doWrap($out, $wrapit[0], $break, $class, $breakclass);
             }
         }
+
         return '';
     }
 }
 
 // -------------------------------------------------------------
 // Cloned getTree() from txplib_db.php because that function doesn't extract description
-function smd_tag_tree($root, $type, $where='1=1', $tbl='txp_category') {
+function smd_tag_tree($root, $type, $where = '1=1', $tbl = 'txp_category')
+{
     $root = doSlash($root);
     $type = doSlash($type);
 
@@ -3524,7 +3635,10 @@ function smd_tag_tree($root, $type, $where='1=1', $tbl='txp_category') {
         "name='$root' and type = '$type'"
     );
 
-    if (!$rs) return array();
+    if (!$rs) {
+        return array();
+    }
+
     extract($rs);
 
     $out = array();
@@ -3538,6 +3652,7 @@ function smd_tag_tree($root, $type, $where='1=1', $tbl='txp_category') {
 
     while ($rs and $row = nextRow($rs)) {
         extract($row);
+
         while (count($right) > 0 && $right[count($right)-1] < $rgt) {
             array_pop($right);
         }
@@ -3556,37 +3671,43 @@ function smd_tag_tree($root, $type, $where='1=1', $tbl='txp_category') {
 
         $right[] = $rgt;
     }
+
     return($out);
 }
 
 // ------------------------
 // Find some value in a tree and return the matching entries
-function smd_tag_tree_search($val, $tree, $limit=0, $field='name') {
+function smd_tag_tree_search($val, $tree, $limit = 0, $field = 'name')
+{
     $ctr = 0;
     $out = array();
+
     foreach ($tree as $idx => $entry) {
         if ($entry[$field] == $val) {
             $out[] = $tree[$idx];
             $ctr++;
         }
+
         if ($limit > 0 && $ctr == $limit) {
             break;
         }
     }
+
     return $out;
 }
 
 // ------------------------
 // PHP4 equivalent of array_combine (from http://www.php.net/manual/en/function.array-combine.php)
 if (!function_exists('array_combine')) {
-function array_combine($arr1, $arr2) {
+function array_combine($arr1, $arr2)
+{
     $out = array();
 
     $arr1 = array_values($arr1);
     $arr2 = array_values($arr2);
 
-    foreach($arr1 as $key1 => $value1) {
-    $out[(string)$value1] = $arr2[$key1];
+    foreach ($arr1 as $key1 => $value1) {
+        $out[(string)$value1] = $arr2[$key1];
     }
 
     return $out;
@@ -3597,7 +3718,8 @@ function array_combine($arr1, $arr2) {
 // PUBLIC TAGS
 // ------------------------
 // Check tags of a particular type, or those that have a specific property in context.
-function smd_if_tag ($atts, $thing) {
+function smd_if_tag ($atts, $thing)
+{
     global $smd_tags, $smd_tag_type, $smd_thistag;
 
     if (!smd_tags_table_exist()) {
@@ -3617,7 +3739,7 @@ function smd_if_tag ($atts, $thing) {
         'level'       => NULL,
         'search_mode' => NULL,
         'is'          => NULL,
-    ),$atts));
+    ), $atts));
 
     // Validate atts
     $validTypes = array('article','image','file','link');
@@ -3687,6 +3809,7 @@ function smd_if_tag ($atts, $thing) {
 
     // Init
     $out = $result = $numTests = 0;
+
     if (!isset($smd_tags[$type]) && empty($smd_thistag)) {
         // not in scope
     } else {
@@ -3710,12 +3833,14 @@ function smd_if_tag ($atts, $thing) {
                             $out++;
                         }
                     }
+
                     if (isset($smd_tags[$type]['tag_'.$tname]) && in_array($tval, $smd_tags[$type]['tag_'.$tname], empty($tval) && $tval !== '0')) {
                         $out++;
                     }
                 }
             }
         }
+
         // Search comparisons
         foreach ($searchtest as $tname => $tval) {
             if (!is_null($tval)) {
@@ -3727,16 +3852,19 @@ function smd_if_tag ($atts, $thing) {
                 }
             }
         }
+
         // Numeric comparisons
         foreach ($nutest as $tname => $tval) {
             $numTests++;
             $op = current(array_keys($tval));
             $val = current($tval);
+
             if ($smd_thistag) {
                 $comparison = $smd_thistag['tag_'.$tname];
             } else {
                 $comparison = $smd_tags[$type]['tag_'.$tname];
             }
+
             switch ($op) {
                 case '>':
                     if (isset($comparison) && $comparison > $val) {
@@ -3781,6 +3909,7 @@ function smd_if_tag ($atts, $thing) {
 function smd_if_tag_list ($atts, $thing)
 {
     global $smd_tag_type;
+
     return parse(EvalElse($thing, (!empty($smd_tag_type))));
 }
 
@@ -4643,7 +4772,7 @@ To do (possibly):
 
 h2(install). Installation / Uninstallation
 
-p(important). Requires Textpattern 4.6.2+.
+p(important). Requires Textpattern 4.7.3+.
 
 p(important). If upgrading from plugin v0.20 or earlier: delete smd_tags_client and smd_tags_admin plugins first, then install and activate this plugin. Your prefs and tags will be retained.
 
@@ -4660,12 +4789,12 @@ h2. Admin-side buttons
 * *Manage tags*: Switch to the "tag management page":#manage
 * *Preferences*: Switch to the "preferences page":#prefs
 * *Import tags*: "Import tags":#import from tru_tags, rss_unlimited_categories or Txp categories/custom fields
-* *Install prefs &#8224;*: Install the plugin preferences; useful if your have upgraded or wish to resync missing prefs. Any existing preference values will be retained.
-* *Remove prefs &#8224;*: Delete the plugin preferences; useful if your prefs have become corrupted or you simply want to return to "default" operation.
-* *Remove tables &#8224;*: Delete the tags tables. This will permanently erase all tags against all articles, images, files and links. Be very sure you mean it before clicking this!
-* *Rebuild tags &#8224;*: If your tag table is corrupt you *may* be able to fix it with this option. However, if it is badly damaged you may just get a white screen of death. If that is the case, your options are then to either fix it by hand or delete the bad entries, rebuild the table with the remaining items and then repopulate the tags.
+* *Install prefs †*: Install the plugin preferences; useful if your have upgraded or wish to resync missing prefs. Any existing preference values will be retained.
+* *Remove prefs †*: Delete the plugin preferences; useful if your prefs have become corrupted or you simply want to return to "default" operation.
+* *Remove tables †*: Delete the tags tables. This will permanently erase all tags against all articles, images, files and links. Be very sure you mean it before clicking this!
+* *Rebuild tags †*: If your tag table is corrupt you *may* be able to fix it with this option. However, if it is badly damaged you may just get a white screen of death. If that is the case, your options are then to either fix it by hand or delete the bad entries, rebuild the table with the remaining items and then repopulate the tags.
 
-&#8224; Use the *More...* link to reveal these items.
+† Use the *More...* link to reveal these items.
 
 h2(#prefs). The preferences
 
