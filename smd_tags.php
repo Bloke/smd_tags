@@ -831,25 +831,28 @@ function smd_tags_inject_css($evt, $stp)
 
     $smd_tag_preflist = smd_tags_get_prefs('name');
     $prefset = smd_tags_pref_get($smd_tag_preflist);
-    $onoff = smd_tags_pref_explode($prefset['smd_tag_p_enable']['val']);
-    $mapped = isset($eventmap[$event]) ? $eventmap[$event] : '';
-    $addIt = ($mapped && $onoff[gTxt('tab_'.$mapped)] == 1) ? true : false;
 
-    $stylereps = array(
-        '{hov}' => $prefset['smd_tag_t_hover']['val'],
-        '{cur}' => $prefset['smd_tag_t_hilite']['val'],
-    );
+    if ($prefset) {
+        $onoff = smd_tags_pref_explode($prefset['smd_tag_p_enable']['val']);
+        $mapped = isset($eventmap[$event]) ? $eventmap[$event] : '';
+        $addIt = ($mapped && $onoff[gTxt('tab_'.$mapped)] == 1) ? true : false;
 
-    $plugin_styles = array();
+        $stylereps = array(
+            '{hov}' => $prefset['smd_tag_t_hover']['val'],
+            '{cur}' => $prefset['smd_tag_t_hilite']['val'],
+        );
 
-    if ($event === 'smd_tags') {
-        $plugin_styles[] = smd_tags_get_style_rules('all');
-    } elseif ($addIt) {
-        $plugin_styles[] = smd_tags_get_style_rules('common');
-    }
+        $plugin_styles = array();
 
-    if ($plugin_styles) {
-        echo '<style>' . strtr(implode(n, $plugin_styles), $stylereps) . '</style>';
+        if ($event === 'smd_tags') {
+            $plugin_styles[] = smd_tags_get_style_rules('all');
+        } elseif ($addIt) {
+            $plugin_styles[] = smd_tags_get_style_rules('common');
+        }
+
+        if ($plugin_styles) {
+            echo '<style>' . strtr(implode(n, $plugin_styles), $stylereps) . '</style>';
+        }
     }
 
     return;
@@ -1455,20 +1458,20 @@ EOJS
                 );
             }
 
-        echo tag_start('div', array('class' => 'txp-layout-4col-alt')).
-            wrapGroup(
-                'smd_tags_prefs',
-                n.tag(join($groupOut), 'ul', array('class' => 'switcher-list')),
-                'smd_tag_prefs_title'
-            );
+            echo tag_start('div', array('class' => 'txp-layout-4col-alt')).
+                wrapGroup(
+                    'smd_tags_prefs',
+                    n.tag(join($groupOut), 'ul', array('class' => 'switcher-list')),
+                    'smd_tag_prefs_title'
+                );
 
-        echo graf(fInput('submit', 'submit', gTxt('save'), 'publish'), array('class' => 'txp-save'));
+            echo graf(fInput('submit', 'submit', gTxt('save'), 'publish'), array('class' => 'txp-save'));
 
-        echo n.tag_end('div'). // End of .txp-layout-4col-alt.
-            n.tag_start('div', array('class' => 'txp-layout-4col-3span')).
-            join(n, $prefOut).
-            n.tag_end('div'). // End of .txp-layout-4col-3span.
-            tInput();
+            echo n.tag_end('div'). // End of .txp-layout-4col-alt.
+                n.tag_start('div', array('class' => 'txp-layout-4col-3span')).
+                join(n, $prefOut).
+                n.tag_end('div'). // End of .txp-layout-4col-3span.
+                tInput();
         } elseif ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
             // Prefs possibly corrupt, or plugin updated
             echo startTable()
@@ -1863,19 +1866,19 @@ EOJS
     // The tag management panel
     if (smd_tags_table_exist()) {
         // Tables installed
-        if ($numPrefs == $numReqPrefs) {
-            // Prefs all installed
-            echo '<div class="txp-layout">'.
-                n. '<div class="txp-layout-2col">'.
-                n. hed(gTxt('smd_tag_manage_lbl').sp.$btnHelp, 1).
-                n. '</div>'.
-                n. '<div class="txp-layout-2col">'.
-                graf(
-                    $btnSync
-                    .n.$btnPrefs
-                , ' class="txp-actions"').
+        echo '<div class="txp-layout">'.
+            n. '<div class="txp-layout-2col">'.
+            n. hed(gTxt('smd_tag_manage_lbl').sp.$btnHelp, 1).
+            n. '</div>'.
+            n. '<div class="txp-layout-2col">'.
+            graf(
+                $btnSync
+                .n.$btnPrefs
+            , ' class="txp-actions"').
             n. '</div>';
 
+        if ($numPrefs == $numReqPrefs) {
+            // Prefs all installed
             // Live search / multi-edit
             $filtopts = array(
                 'smd_all' => gTxt('smd_tag_all_lbl'),
@@ -2464,20 +2467,11 @@ function smd_tags_sync($message = '', $report = '')
 
     extract(doSlash(gpsa(array('smd_tags_sync_type', 'smd_tags_sync_cfs', 'smd_tags_sync_cfs_delim', 'smd_tags_sync_section', 'smd_tags_sync_parent', 'smd_tags_delete_orig', 'smd_tags_import_tag_parent', 'smd_tags_import_cat_parent', 'smd_tags_import_force_parent', 'smd_tags_import_force_cat', 'smd_tags_do_import'))));
 
-    $ctrls = smd_tags_pref_get(array('smd_tag_p_linkcat', 'smd_tag_t_enrep'), 1);
-    $clink = $ctrls['smd_tag_p_linkcat']['val'];
-    $showrep = $report && $ctrls['smd_tag_t_enrep']['val'];
-
-    pagetop(gTxt('smd_tag_sync_lbl'),$message);
+    pagetop(gTxt('smd_tag_sync_lbl'), $message);
     extract(smd_tags_buttons());
 
-    $plug_tt = (is_array($plugins) && in_array('tru_tags',$plugins));
-    $plug_uc = (is_array($plugins) && in_array('rss_unlimited_categories',$plugins));
-
-    // Prefs check
-    $prefset = smd_tags_pref_get($smd_tag_prefs);
-    $numReqPrefs = count($smd_tag_prefs);
-    $numPrefs = count($prefset);
+    $plug_tt = (is_array($plugins) && in_array('tru_tags', $plugins));
+    $plug_uc = (is_array($plugins) && in_array('rss_unlimited_categories', $plugins));
 
     // Perform the import via AJAX due to the quantity of tags that may be involved
     if ($smd_tags_do_import) {
@@ -2496,13 +2490,39 @@ function smd_tags_sync($message = '', $report = '')
         smd_tags_import($impopts);
     }
 
-    $qs = array(
-        "event" => "smd_tags",
-    );
+    // Prefs check
+    $prefset = smd_tags_pref_get($smd_tag_prefs);
+    $numReqPrefs = count($smd_tag_prefs);
+    $numPrefs = count($prefset);
 
-    $qsVars = "index.php".join_qs($qs);
+    // The tag sync preferences
+    if (smd_tags_table_exist()) {
+        // Tables installed
+        echo '<form method="post" id="smd_syncit" action="?event=smd_tags&step=smd_tags_sync">'.
+            n.'<div class="txp-layout">'.
+            n. '<div class="txp-layout-2col">'.
+            n. hed(gTxt('smd_tag_sync_lbl').sp.$btnHelp, 1).
+            n. '</div>'.
+            n. '<div class="txp-layout-2col">'.
+            graf(
+                $btnManage
+                .n.$btnPrefs
+            , ' class="txp-actions"').
+            n. '</div>';
 
-    echo script_js(<<<EOS
+        // Prefs all installed
+        if ($numPrefs == $numReqPrefs) {
+            $ctrls = smd_tags_pref_get(array('smd_tag_p_linkcat', 'smd_tag_t_enrep'), 1);
+            $clink = $ctrls['smd_tag_p_linkcat']['val'];
+            $showrep = $report && $ctrls['smd_tag_t_enrep']['val'];
+
+            $qs = array(
+                "event" => "smd_tags",
+            );
+
+            $qsVars = "index.php".join_qs($qs);
+
+            echo script_js(<<<EOS
 jQuery(function() {
     function smd_tagRestrict(typ) {
         grabcat = jQuery("#smd_tags_import_cat_parent option:selected").val();
@@ -2552,24 +2572,7 @@ function smd_tags_toggle_report() {
     jQuery("#smd_tag_report_pane").toggle('fast');
 }
 EOS
-    );
-
-    // The tag sync preferences
-    if (smd_tags_table_exist()) {
-        // Tables installed
-        if ($numPrefs == $numReqPrefs) {
-            // Prefs all installed
-            echo '<form method="post" id="smd_syncit" action="?event=smd_tags&step=smd_tags_sync">'.
-                n.'<div class="txp-layout">'.
-                n. '<div class="txp-layout-2col">'.
-                n. hed(gTxt('smd_tag_sync_lbl').sp.$btnHelp, 1).
-                n. '</div>'.
-                n. '<div class="txp-layout-2col">'.
-                graf(
-                    $btnManage
-                    .n.$btnPrefs
-                , ' class="txp-actions"').
-            n. '</div>';
+            );
 
             echo n. '<div id="smd_tag_report_pane">'
                 .n. '<div>'
@@ -2759,7 +2762,7 @@ EOS
 
             echo n.$btnSyncGo;
             echo tInput()
-                . '</div></form>';
+                . '</div>';
         } elseif ($numPrefs > 0 && $numPrefs < $numReqPrefs) {
             // Prefs possibly corrupt, or plugin updated
             echo startTable()
@@ -2790,7 +2793,7 @@ EOS
             .n. endTable();
     }
 
-    echo '</div>';
+    echo '</div></form>';
 }
 
 // ------------------------
