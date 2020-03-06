@@ -248,6 +248,16 @@ if (!defined('txpinterface'))
 
 // ------------------------
 // ADMIN SIDE CODE
+if (!defined('SMD_TAG')) {
+    define("SMD_TAG", 'smd_tags');
+}
+if (!defined('SMD_TAGC')) {
+    define("SMD_TAGC", 'smd_tags_cat');
+}
+if (!defined('SMD_TAGU')) {
+    define("SMD_TAGU", 'smd_tags_used');
+}
+
 if (txpinterface === 'admin') {
     add_privs('smd_tags','1,2');
     add_privs('smd_tags_users','1,2,3,4,5,6');
@@ -291,18 +301,8 @@ if (txpinterface === 'admin') {
             ->register('smd_if_tag_list')
             ->register('smd_related_tags');
     }
-
-    register_callback('smd_tags_url_handler', 'pretext');
-}
-
-if (!defined('SMD_TAG')) {
-    define("SMD_TAG", 'smd_tags');
-}
-if (!defined('SMD_TAGC')) {
-    define("SMD_TAGC", 'smd_tags_cat');
-}
-if (!defined('SMD_TAGU')) {
-    define("SMD_TAGU", 'smd_tags_used');
+//    register_callback('smd_tags_url_handler', 'pretext');
+    smd_tags_url_handler();
 }
 
 /**
@@ -3062,8 +3062,8 @@ function smd_tags_remove_empty($var) {
 
 // ------------------------
 // Handle fake tag section URL
-function smd_tags_url_handler($evt, $stp) {
-    global $smd_tag_type, $pretext, $permlink_mode;
+function smd_tags_url_handler($evt = null, $stp = null) {
+    global $smd_tag_type, $permlink_mode;
 
     if (!smd_tags_table_exist()) {
         return;
