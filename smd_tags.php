@@ -218,7 +218,6 @@ if (!defined('txpinterface'))
  * @link   https://stefdawson.com/
  *
  * @todo
- * Remove EvalElse()
  * Alter tag pool layout to allow collapsing groups of parent->children
  * Use article_row_info(), link_format_info()
  * Investigate storing tag data as jQuery .data() instead of in <span>s (from Txp 4.6+ it can be done in HTML data-* attributes)
@@ -3904,7 +3903,7 @@ function smd_if_tag ($atts, $thing)
         }
     }
 
-    return parse(EvalElse($thing, $result));
+    return parse($thing, $result);
 }
 
 // ------------------------
@@ -3912,7 +3911,7 @@ function smd_if_tag_list ($atts, $thing)
 {
     global $smd_tag_type;
 
-    return parse(EvalElse($thing, (!empty($smd_tag_type))));
+    return parse($thing, (!empty($smd_tag_type)));
 }
 
 // ------------------------
