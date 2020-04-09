@@ -17,9 +17,9 @@ $plugin['name'] = 'smd_tags';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.7.0';
+$plugin['version'] = '0.7.1';
 $plugin['author'] = 'Stef Dawson';
-$plugin['author_uri'] = 'http://stefdawson.com/';
+$plugin['author_uri'] = 'https://stefdawson.com/';
 $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and links';
 
 // Plugin load order:
@@ -28,7 +28,7 @@ $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and
 // (1...4) to prepare the environment for everything else that follows.
 // Values 6...9 should be considered for plugins which would work late.
 // This order is user-overrideable.
-$plugin['order'] = '5';
+$plugin['order'] = '4';
 
 // Plugin 'type' defines where the plugin is loaded
 // 0 = public              : only on the public side of the website (default)
@@ -215,7 +215,7 @@ if (!defined('txpinterface'))
  *   Tag combinators from the URL
  *
  * @author Stef Dawson
- * @link   http://stefdawson.com/
+ * @link   https://stefdawson.com/
  *
  * @todo
  * Remove EvalElse()
@@ -244,6 +244,8 @@ if (!defined('txpinterface'))
  * smd_tags_context() : Invalid argument supplied for foreach() (frickinmuck: http://forum.textpattern.com/viewtopic.php?pid=249250#p249250)
  * Deal with parent attribute in smd_tag_name better (stop it showing 'root'?)
  * Detect scenario when article saves fail and don't update tags under these circumstances (e.g. when concurrent users are editing the same document)
+ * When adding a new tag, it should immediately become available as a parent.
+ * When adding a tag with an apostrophe, the tag title has a backslash added in the box upon save. But it's not there in subsequent views, only after saving/updating.
  */
 
 // ------------------------
