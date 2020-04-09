@@ -4288,7 +4288,11 @@ function smd_related_tags($atts = array(), $thing = null)
     trace_add('[smd_related_tags matches: ' . join(', ', $matches) . ']');
 
     // Convert above opts to SQL query clauses
-    $excludeClause = ($match_self) ? '' : ' AND txp.id != "'.$sqlStubs[$type]["gtags"][$sqlStubs[$type]["gid"]].'"';
+    $excludeClause = '';
+
+    if (!$match_self && !empty($sqlStubs[$type]["gtags"])) {
+        $excludeClause =  ' AND txp.id != "'.$sqlStubs[$type]["gtags"][$sqlStubs[$type]["gid"]].'"';
+    }
 
     $and_mode = (isset($smd_tags['meta']['search_mode']) && ($smd_tags['meta']['search_mode'] == 'and')) ? true : false;
     $and_modeClause = ($and_mode && $matches) ? ' HAVING COUNT(*) = ' . count($matches) : '';
