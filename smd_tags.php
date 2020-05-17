@@ -3210,7 +3210,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
                 $smd_tag = join('/', array_slice($parts, $pos));
                 smd_tags_set($smd_tag_type, $smd_tag);
                 $_SERVER['QUERY_STRING'] = $qatts;
-                $_SERVER['REQUEST_URI'] = $subpath . $parts[0]; // Drop back to section list mode
+                $_SERVER['REQUEST_URI'] = $subpath . $parts[0]. '/'; // Drop back to section list mode
 //              $_SERVER['QUERY_STRING'] = $urlnam.'='.$smd_tag .a. $urltyp.'='.$smd_tag_type . $qatts;
 //              $_SERVER['REQUEST_URI'] = $subpath . $parts[0] . '/?' . serverSet('QUERY_STRING');
             }
