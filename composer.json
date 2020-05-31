@@ -10,7 +10,7 @@
     "source": "https://github.com/bloke/smd_tags"
   },
   "require": {
-    "textpattern/lock": ">=4.7.0",
+    "textpattern/lock": ">=4.8.0",
     "textpattern/installer": "*"
   }
 }

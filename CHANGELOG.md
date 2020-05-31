@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0 - 2020-05-31
+
+* For Txp 4.8.0+.
+* Alter load order by default to circumvent 404s.
+* Remove `EvalElse()`.
+* Fixed: Defend against empty 'this' contexts in `<txp:smd_related_tags>`.
+* Append slashes in the URL handler.
+
 ## 0.7.0 - 2020-03-06
 
 * For Txp 4.7.0+.

@@ -17,7 +17,7 @@ $plugin['name'] = 'smd_tags';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.7.1';
+$plugin['version'] = '0.8.0';
 $plugin['author'] = 'Stef Dawson';
 $plugin['author_uri'] = 'https://stefdawson.com/';
 $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and links';
@@ -4777,7 +4777,7 @@ To do (possibly):
 
 h2(install). Installation / Uninstallation
 
-p(important). Requires Textpattern 4.7.3+.
+p(important). Requires Textpattern 4.8.0+.
 
 p(important). If upgrading from plugin v0.20 or earlier: delete smd_tags_client and smd_tags_admin plugins first, then install and activate this plugin. Your prefs and tags will be retained.
 
