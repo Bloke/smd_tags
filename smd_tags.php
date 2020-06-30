@@ -1564,7 +1564,7 @@ function smd_tags_manage($message = '', $report = '')
 {
     $smd_tag_prefs = smd_tags_get_prefs('name');
 
-    extract(doSlash(gpsa(array('smd_tag_name', 'smd_tag_title', 'smd_tag_description', 'smd_tag_parent', 'smd_tag_cat', 'smd_tag_type', 'smd_tag_id'))));
+    extract(gpsa(array('smd_tag_name', 'smd_tag_title', 'smd_tag_description', 'smd_tag_parent', 'smd_tag_cat', 'smd_tag_type', 'smd_tag_id')));
     pagetop(gTxt('smd_tag_manage_lbl'),$message);
     extract(smd_tags_buttons());
 
@@ -1994,7 +1994,7 @@ EOJS
                     .n.'</div>'
                     .n.'<div class="smd_tags_input_group">'
                         . '<label for="smd_tags_description">'.gTxt('description').'</label>'
-                        . text_area('smd_tags_description', $desch, $descw, $smd_tag_description, 'smd_tags_description')
+                        . text_area('smd_tags_description', $desch, $descw, htmlspecialchars($smd_tag_description), 'smd_tags_description')
                     .n.'</div>'
                     .n.'<div class="smd_tags_input_group">'
                         . '<label>'.gTxt('parent').'</label>'
@@ -2058,7 +2058,7 @@ EOJS
 // Store the tag that is currently being edited/created
 function smd_tag_save()
 {
-    // Defer doSlash of description until after Textile's had a go
+    // Defer doSlash of description until after Textile's had a go.
     extract(doSlash(gpsa(array('smd_tag_oname', 'smd_tag_name', 'smd_tag_title', 'smd_tag_parent', 'smd_tag_cat', 'smd_tag_type', 'smd_tag_id'))));
     include_once txpath.'/publish.php'; // for parse()
 
@@ -2078,7 +2078,7 @@ function smd_tag_save()
     $smd_tags_desctile = doSlash((($txt_desc) ? $textile->parse(parse($smd_tag_description)) : parse($smd_tag_description)));
     $smd_tag_description = doSlash($smd_tag_description);
 
-    // Can't use safe_upsert() because the WHERE is for ID AND type
+    // @todo Use safe_upsert() when it supports multiple WHERE parts for ID AND type.
     if (empty($smd_tag_id)) {
         // Create
         if ($smd_tag_name == '' && $smd_tag_title == '') {
