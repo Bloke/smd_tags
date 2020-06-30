@@ -6,6 +6,7 @@
 * Select tooltips by ID to allow for numeric tag names to be interpreted correctly.
 * Show tag list on image/thumb/file replace too.
 * Correct a few untranslated strings.
+* Fix warning if trying to delete a single, used tag.
 
 ## 0.8.0 - 2020-05-31
 

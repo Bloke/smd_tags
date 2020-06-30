@@ -2259,7 +2259,7 @@ function smd_tag_link($itemid, $tagarr, $tag_type)
 }
 
 // ------------------------
-// Delete the given tag(s). Respects noclobber/tree/orphans depending on prefs
+// Delete the given tag(s). Respects noclobber/tree/orphans depending on prefs.
 function smd_tags_delete()
 {
     extract(doSlash(gpsa(array('smd_tag_id', 'smd_tag_name', 'smd_tag_type'))));
@@ -2278,7 +2278,8 @@ function smd_tags_delete()
     $used_tags = safe_column('tag_id', SMD_TAGU, "tag_id IN ('".join("','", $smd_tag_id)."') AND type='$smd_tag_type'");
 
     $to_del = $smd_tag_id;
-    // Protect used and child tags if required
+
+    // Protect used and child tags if required.
     if ($delu == 0) {
         $to_del = array_diff($smd_tag_id, $with_child, $used_tags);
         foreach (array_merge($with_child, $used_tags) as $delid) {
@@ -2287,17 +2288,20 @@ function smd_tags_delete()
     }
 
     $orphans = array();
+
     if ($delt) {
-        // Add child tags if they are to be deleted
+        // Add child tags if they are to be deleted.
         $ids = $to_del;
+
         foreach ($to_del as $delid) {
             $row = safe_row('*', SMD_TAG, "id = '$delid' AND type='$smd_tag_type'");
             $ids = array_merge($ids, safe_column('id', SMD_TAG, "type = '$smd_tag_type' AND (lft BETWEEN ".$row['lft']." AND ".$row['rgt'].")"));
         }
+
         $to_del = array_unique($ids);
         $msgExtra = gTxt('smd_tag_children_and');
     } else {
-        // Collect the potential orphans and prepare to promote them
+        // Collect the potential orphans and prepare to promote them.
         foreach ($to_del as $delid) {
             $children = safe_column('id', SMD_TAG, "parent = '".$smd_tag_name[array_search($delid, $smd_tag_id)]."' AND type='$smd_tag_type'");
             $children = array_diff($children, $to_del);
@@ -2311,7 +2315,7 @@ function smd_tags_delete()
     $numdel = count($to_del);
 
     // Make a note of what we're about to do for the report
-    $all_dels = safe_rows('id, name', SMD_TAG, "id IN (" . join(',', quote_list($to_del)) . ")");
+    $all_dels = $to_del ? safe_rows('id, name', SMD_TAG, "id IN (" . join(',', quote_list($to_del)) . ")") : array();
     $all_names = array();
 
     foreach ($all_dels as $aname) {
@@ -2325,8 +2329,8 @@ function smd_tags_delete()
     }
 
     // First get rid of the direct tags
-    $where = " IN ('".join("','", $to_del)."')";
-    $ret = safe_delete(SMD_TAG, 'id'.$where." AND type='$smd_tag_type'");
+    $where = $to_del ? " IN ('".join("','", $to_del)."')" : 0;
+    $ret = $where ? safe_delete(SMD_TAG, 'id'.$where." AND type='$smd_tag_type'") : false;
 
     if ($ret) {
         if (!$delt) {
