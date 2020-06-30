@@ -17,7 +17,7 @@ $plugin['name'] = 'smd_tags';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.8.0';
+$plugin['version'] = '0.8.1';
 $plugin['author'] = 'Stef Dawson';
 $plugin['author_uri'] = 'https://stefdawson.com/';
 $plugin['description'] = 'Unlimited tag taxonomy for articles, images, files and links';
@@ -438,6 +438,7 @@ function smd_tags_loadlist($evt, $stp)
 
     if (smd_tags_table_exist()) {
         $ctrls = smd_tags_pref_get(array('smd_tag_p_enable', 'smd_tag_p_input', 'smd_tag_p_size', 'smd_tag_p_qtag', 'smd_tag_p_qtpath', 'smd_tag_p_qtstyl', 'smd_tag_p_linkcat', 'smd_tag_t_desc_tooltip'), 1);
+
         $onoff = smd_tags_pref_explode($ctrls['smd_tag_p_enable']['val']);
         $iptyp = $ctrls['smd_tag_p_input']['val'];
         $selsz = $ctrls['smd_tag_p_size']['val'];
@@ -549,8 +550,9 @@ jQuery(function() {
     function smd_tagList(typ) {
         var grabcats = [];
         {$grabcats}.each(function() {
-            if (jQuery(this).val() != '') {
-               grabcats.push(jQuery(this).val());
+            var meVal = jQuery(this).val();
+            if (meVal != '') {
+               grabcats.push(meVal);
             }
         });
         grabcats = grabcats.join(",");
@@ -574,9 +576,9 @@ jQuery(function() {
 
                     if (curr.prop("selected") == true) {
                         smd_tagsel.push(txt);
-                        jQuery("#smd_tags_bylink").append('<span class="smd_sel">'+txt+'</span>');
+                        jQuery("#smd_tags_bylink").append('<span data-id="'+curr.val()+'" class="smd_sel">'+txt+'</span>');
                     } else {
-                        jQuery("#smd_tags_bylink").append('<span>'+txt+'</span>');
+                        jQuery("#smd_tags_bylink").append('<span data-id="'+curr.val()+'">'+txt+'</span>');
                     }
                 });
 
@@ -621,12 +623,17 @@ jQuery(function() {
                         jQuery('.smd_tooltip').hide('fast');
                     });
                     jQuery('#smd_tags select option, #smd_tags_bylink span').hover( function(ev) {
-                        var thisTag = jQuery(this).val();
+                        var me = jQuery(this);
+                        var meTT = jQuery('#smd_tag_tt');
+
+                        var thisTag = me.val();
+
                         if (!thisTag) {
-                            thisTag = jQuery(this).html();
+                            thisTag = me.data('id').toString();
                         }
+
                         if (jQuery('#smd_tag_tt').data(thisTag)) {
-                            smd_tags_show_desc(ev, jQuery('#smd_tag_tt').data(thisTag));
+                            smd_tags_show_desc(ev, meTT.data(thisTag));
                         } else {
                             jQuery.post('{$qsVars}',
                             {
@@ -635,8 +642,8 @@ jQuery(function() {
                                 _txp_token: textpattern._txp_token
                             },
                             function(data) {
-                                jQuery('#smd_tag_tt').data(thisTag, data);
-                                smd_tags_show_desc(ev, jQuery('#smd_tag_tt').data(thisTag));
+                                meTT.data(thisTag, data);
+                                smd_tags_show_desc(ev, meTT.data(thisTag));
                             });
                         }
                     });
