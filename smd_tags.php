@@ -489,7 +489,7 @@ function smd_tags_loadlist($evt, $stp)
                 }
                 break;
             case "image":
-                if ($step == "image_edit") {
+                if (in_array($step, array('image_edit', 'image_replace', 'thumbnail_insert'))) {
                     $addIt = ($onoff[gTxt('tab_image')] == 1) ? true : false;
                     if ($addIt) {
                         $grabcats = 'jQuery("#image_category option:selected")';
@@ -500,7 +500,7 @@ function smd_tags_loadlist($evt, $stp)
                 }
                 break;
             case "file":
-                if ($step == "file_edit") {
+                if (in_array($step, array('file_edit', 'file_replace'))) {
                     $addIt = ($onoff[gTxt('tab_file')] == 1) ? true : false;
                     if ($addIt) {
                         $grabcats = 'jQuery("#file_category option:selected")';
@@ -1575,9 +1575,9 @@ function smd_tags_manage($message = '', $report = '')
 
     $types = array(
         'article' => ucfirst(gtxt('article')),
-        'image' => gtxt('tag_image'),
+        'image' => gtxt('image'),
         'file' => gtxt('file'),
-        'link' => gtxt('tag_link'),
+        'link' => gtxt('link'),
     );
 
     // Make up the radio buttons.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.1 - 2020-07-01
+
+* Don't `doSlash()` fields for display. Prevents backslashes appearing in input boxes.
+* Select tooltips by ID to allow for numeric tag names to be interpreted correctly.
+* Show tag list on image/thumb/file replace too.
+* Correct a few untranslated strings.
+
 ## 0.8.0 - 2020-05-31
 
 * For Txp 4.8.0+.
