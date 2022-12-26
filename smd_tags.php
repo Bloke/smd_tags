@@ -55,6 +55,8 @@ $plugin['flags'] = '3';
 // abc_string_name => Localized String
 
 $plugin['textpack'] = <<<EOT
+#@owner
+smd_tags
 #@language en, en-gb, en-us
 #@admin-side
 smd_tags => Tags (smd)
@@ -316,15 +318,17 @@ if (txpinterface === 'admin') {
 function smd_tags_welcome($evt, $stp)
 {
     $msg = '';
+
     switch ($stp) {
         case 'installed':
-            smd_tags_table_install(0);
+            smd_tags_table_install();
             $msg = 'Happy tagging!';
             break;
         case 'deleted':
-            smd_tags_prefs_remove('', 0);
+            smd_tags_table_remove();
             break;
     }
+
     return $msg;
 }
 
@@ -353,7 +357,9 @@ function smd_tags($evt, $stp)
         'smd_tags_prefs_update'     => true,
         'smd_tags_sync'             => false,
         'smd_tags_table_install'    => false,
+        'smd_tags_table_install_ui' => false,
         'smd_tags_table_remove'     => false,
+        'smd_tags_table_remove_ui'  => false,
         'smd_tags_table_rebuild'    => false,
     );
 
@@ -436,7 +442,7 @@ function smd_tags_loadlist($evt, $stp)
 {
     global $app_mode, $step;
 
-    if (smd_tags_table_exist()) {
+    if (smd_tags_table_exist(1)) {
         $ctrls = smd_tags_pref_get(array('smd_tag_p_enable', 'smd_tag_p_input', 'smd_tag_p_size', 'smd_tag_p_qtag', 'smd_tag_p_qtpath', 'smd_tag_p_qtstyl', 'smd_tag_p_linkcat', 'smd_tag_t_desc_tooltip'), 1);
 
         $onoff = smd_tags_pref_explode($ctrls['smd_tag_p_enable']['val']);
@@ -686,7 +692,7 @@ EOJS
 // Update the tags used table if some tags have been added/saved
 function smd_tags_savelist($evt, $stp)
 {
-    if (smd_tags_table_exist()) {
+    if (smd_tags_table_exist(1)) {
         $ctrls = smd_tags_pref_get(array('smd_tag_p_qtag', 'smd_tag_p_input', 'smd_tag_p_linkcat', 'smd_tag_p_master'), 1);
         $quick = $ctrls['smd_tag_p_qtag']['val'];
         $iptyp = $ctrls['smd_tag_p_input']['val'];
@@ -794,7 +800,7 @@ function smd_tags_savelist($evt, $stp)
 function smd_tags_multi_edit($evt, $stp)
 {
     // In Txp 4.0.6 the only tabs to allow multi-edits are the Article (list) and Link tabs. Cheat for now
-    if (smd_tags_table_exist()) {
+    if (smd_tags_table_exist(1)) {
         switch ($evt) {
             case "list":
             case "link":
@@ -1015,41 +1021,56 @@ function smd_tags_get_prefs($type)
 }
 
 // ------------------------
-function smd_tags_table_exist($all = '0')
+function smd_tags_table_exist($which = '')
 {
-    static $smd_tags_table_ok = array();
+    global $DB;
 
-    if (isset($smd_tags_table_ok[$all])) {
-        return $smd_tags_table_ok[$all];
+    static $smd_tags_installed = array();
+
+    // The number of expected cols in each table.
+    $tbls = array(
+        SMD_TAG  => 9,
+        SMD_TAGC => 2,
+        SMD_TAGU => 3,
+    );
+
+    if ($which && array_key_exists($which, $tbls) && isset($smd_tags_able_ok[$which])) {
+        return ($smd_tags_installed[$which] == $tbls[$which]);
     }
 
-    if ($all) {
-        $tbls = array(SMD_TAG => 9, SMD_TAGC => 2, SMD_TAGU => 3);
+    if ($which == '1') {
         $out = count($tbls);
+
         foreach ($tbls as $tbl => $cols) {
-            if (gps('debug')) {
-                echo "++ TABLE " . $tbl . " HAS " . count(@safe_show('columns', $tbl)) . " COLUMNS; REQUIRES " . $cols . " ++" . br;
-            }
-            if (count(@safe_show('columns', $tbl)) == $cols) {
-                $out--;
+            $res = mysqli_query($DB->link, "SHOW TABLES LIKE '".PFX.$tbl."'");
+
+            if (mysqli_fetch_row($res) !== NULL) {
+                $num = count(safe_show('columns', $tbl));
+                $smd_tags_installed[$tbl] = $num;
+                $out -= ($tbls[$tbl] == $num) ? 1 : 0;
             }
         }
-        $ret = ($out===0) ? 1 : 0;
-        $smd_tags_table_ok[1] = $ret;
-        return $ret;
-    } else {
-        if (gps('debug')) {
-            echo "++ TABLE " . SMD_TAG . " HAS " . count(@safe_show('columns', SMD_TAG)) . " COLUMNS;";
+
+        return ($out === 0) ? 1 : 0;
+    } elseif (array_key_exists($which, $tbls)) {
+        $res = mysqli_query($DB->link, "SHOW TABLES LIKE '".PFX.$which."'");
+
+        if (mysqli_fetch_row($res) !== NULL) {
+            $num = count(safe_show('columns', $which));
+            $smd_tags_installed[$which] = $num;
+
+            return ($smd_tags_installed[$which] == $tbls[$which]);
         }
-        $ret = @safe_show('columns', SMD_TAG);
-        $smd_tags_table_ok[0] = $ret;
-        return $ret;
+
+        return false;
     }
+
+    return false;
 }
 
 // ------------------------
 // Add tag tables if not already installed
-function smd_tags_table_install($showpane = '1')
+function smd_tags_table_install()
 {
     global $DB;
 
@@ -1071,7 +1092,7 @@ function smd_tags_table_install($showpane = '1')
         PRIMARY KEY (`id`)
     ) ENGINE=MyISAM PACK_KEYS=1 AUTO_INCREMENT=5 CHARACTER SET=utf8";
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         $sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (1, 'root', 'article', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
         $sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (2, 'root', 'link', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
         $sql[] = "INSERT INTO `".PFX.SMD_TAG."` VALUES (3, 'root', 'image', '', 1, 2, 'root', 'DO NOT DELETE', NULL)";
@@ -1124,13 +1145,11 @@ function smd_tags_table_install($showpane = '1')
 
     if ($GLOBALS['txp_err_count'] == 0) {
         $message = gTxt('smd_tag_tbl_installed');
-        smd_tags_prefs_install($message, $showpane);
     } else {
-        if ($showpane) {
-            $message = gTxt('smd_tag_tbl_not_installed');
-            smd_tags_prefs_show($message);
-        }
+        $message = gTxt('smd_tag_tbl_not_installed');
     }
+
+    return $message;
 }
 
 // ------------------------
@@ -1143,7 +1162,7 @@ function smd_tags_table_remove()
     $sql = array();
     $GLOBALS['txp_err_count'] = 0;
 
-    if (smd_tags_table_exist()) {
+    if (smd_tags_table_exist(1)) {
         $sql[] = "DROP TABLE IF EXISTS " .PFX.SMD_TAG. "; ";
         $sql[] = "DROP TABLE IF EXISTS " .PFX.SMD_TAGU. "; ";
         $sql[] = "DROP TABLE IF EXISTS " .PFX.SMD_TAGC. "; ";
@@ -1165,11 +1184,25 @@ function smd_tags_table_remove()
 
     if ($GLOBALS['txp_err_count'] == 0) {
         $message = gTxt('smd_tag_tbl_removed');
-        smd_tags_prefs_remove($message);
     } else {
         $message = gTxt('smd_tag_tbl_not_removed');
-        smd_tags_prefs_show($message);
     }
+
+    return $message;
+}
+
+// ------------------------
+function smd_tags_table_install_ui()
+{
+    $msg = smd_tags_table_install();
+    smd_tags_prefs_show($msg);
+}
+
+// ------------------------
+function smd_tags_table_remove_ui()
+{
+    $msg = smd_tags_table_remove();
+    smd_tags_prefs_show($msg);
 }
 
 // ------------------------
@@ -1188,7 +1221,7 @@ function smd_tags_table_rebuild()
 
 // ------------------------
 // Add plugin preferences to prefs
-function smd_tags_prefs_install($message = '', $showpane = '1')
+function smd_tags_prefs_install($message = '')
 {
     $smd_tag_prefs = smd_tags_get_prefs('nameval');
 
@@ -1208,15 +1241,13 @@ function smd_tags_prefs_install($message = '', $showpane = '1')
         remove_pref($pref, 'smd_tags');
     }
 
-    if ($showpane) {
-        $message .= gTxt('smd_tag_prefs_installed');
-        smd_tags_prefs_show($message);
-    }
+    $message .= gTxt('smd_tag_prefs_installed');
+    smd_tags_prefs_show($message);
 }
 
 // ------------------------
 // Remove plugin preferences from prefs table.
-function smd_tags_prefs_remove($message = '', $showpane = '1')
+function smd_tags_prefs_remove($message = '')
 {
     $smd_tag_prefs = array_merge(smd_tags_get_prefs('name'), smd_tags_get_prefs('old'));
 
@@ -1224,10 +1255,8 @@ function smd_tags_prefs_remove($message = '', $showpane = '1')
         remove_pref($pref, 'smd_tags');
     }
 
-    if ($showpane) {
-        $message .= gTxt('smd_tag_prefs_removed');
-        smd_tags_prefs_show($message);
-    }
+    $message .= gTxt('smd_tag_prefs_removed');
+    smd_tags_prefs_show($message);
 }
 
 // ------------------------
@@ -1315,8 +1344,8 @@ function smd_tags_buttons()
 {
     $ret = array (
         'btnPrefsSave' => fInput('submit', 'submit', gTxt('save'), 'publish'),
-        'btnInstallTbl' => sLink('smd_tags', 'smd_tags_table_install', '<span class="ui-icon ui-extra-icon-upload"></span> '.gTxt('smd_tag_tbl_install_lbl')),
-        'btnRemoveTbl' => sLink('smd_tags', 'smd_tags_table_remove', '<span class="ui-icon ui-icon-trash"></span> '.gTxt('smd_tag_tbl_remove_lbl')),
+        'btnInstallTbl' => sLink('smd_tags', 'smd_tags_table_install_ui', '<span class="ui-icon ui-extra-icon-upload"></span> '.gTxt('smd_tag_tbl_install_lbl')),
+        'btnRemoveTbl' => sLink('smd_tags', 'smd_tags_table_remove_ui', '<span class="ui-icon ui-icon-trash"></span> '.gTxt('smd_tag_tbl_remove_lbl')),
         'btnRebuildTbl' => sLink('smd_tags', 'smd_tags_table_rebuild', '<span class="ui-icon ui-icon-refresh"></span> '.gTxt('smd_tag_tbl_rebuild_lbl')),
         'btnInstall' => sLink('smd_tags', 'smd_tags_prefs_install', '<span class="ui-icon ui-extra-icon-upload"></span> '.gTxt('smd_tag_pref_install_lbl')),
         'btnRemove' => sLink('smd_tags', 'smd_tags_prefs_remove', '<span class="ui-icon ui-icon-trash"></span> '.gTxt('smd_tag_pref_remove_lbl')),
@@ -1913,7 +1942,7 @@ EOJS
     }
 
     // The tag management panel
-    if (smd_tags_table_exist()) {
+    if (smd_tags_table_exist(1)) {
         // Tables installed
         echo '<div class="txp-layout">'.
             n. '<div class="txp-layout-2col">'.
@@ -2572,7 +2601,7 @@ function smd_tags_sync($message = '', $report = '')
     $numPrefs = count($prefset);
 
     // The tag sync preferences
-    if (smd_tags_table_exist()) {
+    if (smd_tags_table_exist(1)) {
         // Tables installed
         echo '<form method="post" id="smd_syncit" action="?event=smd_tags&step=smd_tags_sync">'.
             n.'<div class="txp-layout">'.
@@ -3162,7 +3191,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
 {
     global $smd_tag_type, $permlink_mode;
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         return;
     }
 
@@ -3734,7 +3763,7 @@ function smd_if_tag ($atts, $thing)
 {
     global $smd_tags, $smd_tag_type, $smd_thistag;
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         trigger_error(gTxt('smd_tag_not_available'));
         return;
     }
@@ -3931,7 +3960,7 @@ function smd_tag_name($atts = array(), $thing = null)
 {
     global $smd_thistag, $permlink_mode, $plugins;
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         trigger_error(gTxt('smd_tag_not_available'));
         return;
     }
@@ -4001,7 +4030,7 @@ function smd_tag_count($atts = array(), $thing = null)
 {
     global $smd_thistag, $smd_tags;
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         trigger_error(gTxt('smd_tag_not_available'));
         return;
     }
@@ -4039,7 +4068,7 @@ function smd_tag_info($atts = array(), $thing = null)
 {
     global $smd_thistag;
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         trigger_error(gTxt('smd_tag_not_available'));
         return;
     }
@@ -4087,7 +4116,7 @@ function smd_related_tags($atts = array(), $thing = null)
 
     static $smd_tags_pc;
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         trigger_error(gTxt('smd_tag_not_available'));
         return;
     }
@@ -4433,7 +4462,7 @@ function smd_tag_list($atts = array(), $thing = null)
     static $smd_tags_tree = array();
     static $smd_tags_count = array();
 
-    if (!smd_tags_table_exist()) {
+    if (!smd_tags_table_exist(1)) {
         trigger_error(gTxt('smd_tag_not_available'));
         return;
     }
