@@ -886,7 +886,13 @@ function smd_tags_inject_css($evt, $stp)
         }
 
         if ($plugin_styles) {
-            echo '<style>' . strtr(implode(n, $plugin_styles), $stylereps) . '</style>';
+            $content = strtr(implode(n, $plugin_styles), $stylereps);
+
+            if (class_exists('\Textpattern\UI\Style')) {
+                echo Txp::get('\Textpattern\UI\Style')->setContent($content);
+            } else {
+                echo '<style>' . $content . '</style>';
+            }
         }
     }
 
