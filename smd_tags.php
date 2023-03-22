@@ -1811,7 +1811,7 @@ function smd_cellHandler() {
                 jQuery("textarea[name='smd_tags_description']").val(dsc);
                 jQuery(".smd_tags_linkcat select option[value='"+cat+"']").prop("selected", true);
                 smd_parentHandler(nam, typ, tid, par);
-                jQuery(".smd_tags_showlist ${sel}").removeClass('smd_current');
+                jQuery(".smd_tags_showlist {$sel}").removeClass('smd_current');
                 jQuery(this).addClass('smd_current');
                 smd_autofocus();
             });
