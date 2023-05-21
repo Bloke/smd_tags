@@ -3076,7 +3076,9 @@ function smd_tag_parentlist()
     $trycat = isset($_POST['cat']);
     extract(doSlash(gpsa(array('name', 'type', 'id', 'cat', 'itemid', 'listonly', 'html_id', 'link_mode'))));
 
-    while(@ob_end_clean()); // Get rid of any page so far
+    if(ob_get_length() > 0) {
+      while(ob_end_clean()); // Get rid of any page so far
+    }
 
     $listonly = ($listonly == '' || $listonly == 'undefined') ? '' : $listonly;
     $html_id = ($html_id == '' || $html_id == 'undefined') ? 'smd_tag_parent' : $html_id;
@@ -3148,7 +3150,9 @@ function smd_tag_catlist($cat = '')
 {
     extract(doSlash(gpsa(array('name','type','html_id'))));
 
-    while(@ob_end_clean()); // Get rid of any page so far
+    if(ob_get_length() > 0) {
+      while(ob_end_clean()); // Get rid of any page so far
+    }
 
     $type = ($type == "" || $type == "undefined") ? 'article' : $type;
     $html_id = ($html_id == "" || $html_id == "undefined") ? 'smd_tags_catlist' : $html_id;
@@ -3169,7 +3173,9 @@ function smd_tag_get_desc()
 {
     extract(doSlash(gpsa(array('tag_ref'))));
 
-    while (@ob_end_clean()); // Get rid of any page so far
+    if(ob_get_length() > 0) {
+      while (ob_end_clean()); // Get rid of any page so far
+    }
 
     $tag_ref = ($tag_ref == "" || $tag_ref == "undefined") ? '' : $tag_ref;
 
