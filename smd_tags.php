@@ -4136,7 +4136,7 @@ function smd_related_tags($atts = array(), $thing = null)
         'form'       => '',
         'match'      => 'tag_name',
         'match_self' => 0,
-        'no_widow'   => @$prefs['title_no_widow'],
+        'no_widow'   => '',
         'sort'       => '',
         'label'      => '',
         'labeltag'   => '',
