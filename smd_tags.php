@@ -4366,10 +4366,14 @@ function smd_related_tags($atts = array(), $thing = null)
             if ($rs) {
                 trace_add('[smd_related_tags article records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+                $itemCount = 0;
 
                 foreach ($rs as $row) {
                     if (!in_array($row['ID'], $uniqrs)) {
+                        $itemCount++;
                         $safe = ($thisarticle) ? $thisarticle : NULL;
+                        $thisarticle['is_first'] = ($itemCount == 1);
+                        $thisarticle['is_last'] = ($itemCount == $contentCount);
                         populateArticleData($row);
                         $row['Title'] = ($no_widow) ? noWidow(escape_title($row['Title'])) : escape_title($row['Title']);
                         $out[] = ($form) ? parse_form($form) : (($thing) ? parse($thing) : href($row['Title'], permlinkurl($row)));
@@ -4390,10 +4394,14 @@ function smd_related_tags($atts = array(), $thing = null)
             if ($rs) {
                 trace_add('[smd_related_tags image records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+                $itemCount = 0;
 
                 foreach ($rs as $row) {
                     if (!in_array($row['id'], $uniqrs)) {
+                        $itemCount++;
                         $safe = ($thisimage) ? $thisimage : NULL;
+                        $thisimage['is_first'] = ($itemCount == 1);
+                        $thisimage['is_last'] = ($itemCount == $contentCount);
                         $thisimage = image_format_info($row);
                         $out[] = ($form) ? parse_form($form) : (($thing) ? parse($thing) : image(array('id' => $row['id'])));
                         $uniqrs[] = $row['id'];
@@ -4413,10 +4421,14 @@ function smd_related_tags($atts = array(), $thing = null)
             if ($rs) {
                 trace_add('[smd_related_tags file records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+                $itemCount = 0;
 
                 foreach ($rs as $row) {
                     if (!in_array($row['id'], $uniqrs)) {
+                        $itemCount++;
                         $safe = ($thisfile) ? $thisfile : NULL;
+                        $thisfile['is_first'] = ($itemCount == 1);
+                        $thisfile['is_last'] = ($itemCount == $contentCount);
                         $thisfile = file_download_format_info($row);
                         $out[] = ($form) ? parse_form($form) : (($thing) ? parse($thing) : file_download_link(array('filename' => $row['filename']), $row['filename']));
                         $uniqrs[] = $row['id'];
@@ -4436,10 +4448,14 @@ function smd_related_tags($atts = array(), $thing = null)
             if ($rs) {
                 trace_add('[smd_related_tags link records: ' . print_r($rs, true) . ']');
                 $uniqrs = array();
+                $itemCount = 0;
 
                 foreach ($rs as $row) {
                     if (!in_array($row['id'], $uniqrs)) {
+                        $itemCount++;
                         $safe = ($thislink) ? $thislink : NULL;
+                        $thislink['is_first'] = ($itemCount == 1);
+                        $thislink['is_last'] = ($itemCount == $contentCount);
                         $thislink = array(
                             'id'          => $row['id'],
                             'linkname'    => $row['linkname'],
