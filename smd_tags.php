@@ -2924,7 +2924,7 @@ function smd_tags_import($smd_tag_options)
 
     echo '<script type="text/javascript">';
     echo "var ictr = 0; var itot = {$total}; var lnk_ctr = 0;";
-    echo 'jQuery(function() {';
+    echo 'jQuery(async function() {';
     echo 'jQuery("#smd_tags_import_itot").text("/'.$total.'");';
 
     if ($rs) {
@@ -2949,7 +2949,7 @@ function smd_tags_import($smd_tag_options)
             $artid = doSlash($row['ID']);
 
             echo <<<EOJS
-            sendAsyncEvent(
+            await sendAsyncEvent(
             {
                 event: textpattern.event,
                 step: 'smd_tags_import_one',
@@ -2965,7 +2965,7 @@ function smd_tags_import($smd_tag_options)
                 smd_tags_import_force_parent: '{$smd_tags_import_force_parent}',
                 smd_tags_import_force_cat: '{$smd_tags_import_force_cat}',
                 smd_tags_delete_orig: '{$smd_tags_delete_orig}'
-            }, smd_tags_group_feedback);
+            }, smd_tags_group_feedback).promise().catch(console.error);
 EOJS;
         }
 
