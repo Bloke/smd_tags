@@ -1,13 +1,19 @@
 # Changelog
 
-## 0.8.1 - 2020-07-01
+## 0.8.1 - 2025-01-26
 
 * Don't `doSlash()` fields for display. Prevents backslashes appearing in input boxes.
 * Select tooltips by ID to allow for numeric tag names to be interpreted correctly.
 * Show tag list on image/thumb/file replace too.
 * Correct a few untranslated strings.
 * Fix warning if trying to delete a single, used tag.
+* Fix variable replacement.
+* Fix Chrome insufficient resources when importing many tags (thanks, dshovchko).
+* Improve (un)installation process.
 * Add support for if_first/last tags (thanks, jools-r).
+* PHP 8+ support: only clear buffers if necessary (thanks, jools-r).
+* Add support for CSP-aware inline styles (Txp 4.9.0+).
+* Remove defunct `no_widow` pref support (thanks, jools-r).
 
 ## 0.8.0 - 2020-05-31
 
