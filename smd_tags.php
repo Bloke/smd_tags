@@ -759,7 +759,7 @@ function smd_tags_savelist($evt, $stp)
                         if ($iptyp == 3 && !$exists) {
                             $tagBits = explode('-->', $tag);
                             if (count($tagBits) == 2) {
-                                $tagparent = strtolower(sanitizeForUrl($tagBits[0]));
+                                $tagparent = strtolower($tagBits[0]);
                                 $tagparent = safe_field('name', SMD_TAG, "name = '$tagparent' AND type = '$evt'"); // Check parent exists for this type
                                 $tagparent = ($tagparent === false) ? 'root' : $tagparent;
                                 $tagchild = $tagBits[1];
@@ -768,7 +768,7 @@ function smd_tags_savelist($evt, $stp)
                                 $tagchild = $tagBits[0];
                             }
 
-                            $sanitag = strtolower(sanitizeForUrl($tagchild));
+                            $sanitag = strtolower($tagchild);
                             $already = safe_field('id', SMD_TAG, "name = '$sanitag' AND type = '$evt'"); // Check again because parent-->child will fail 1st check
 
                             if ($already === false) {
@@ -2129,7 +2129,7 @@ function smd_tag_save()
                 }
 
                 $theTtl = (isset($alltagttl[$idx]) && $alltagttl[$idx] != '') ? $alltagttl[$idx] : $theTag;
-                $theNam = ($theTag == '') ? sanitizeForUrl($theTtl) : sanitizeForUrl($theTag);
+                $theNam = ($theTag == '') ? $theTtl : $theTag;
 
                 $exists = safe_field('name', SMD_TAG, "name = '$theNam' AND type = '$smd_tag_type'");
                 $parex = safe_field('name', SMD_TAG, "name = '$smd_tag_parent' AND type = '$smd_tag_type'");
@@ -2181,7 +2181,7 @@ function smd_tag_save()
         // Update - no need to maintain referential integrity unlike txp_cats
         // since tags are stored against item IDs
         $smd_tag_title = (empty($smd_tag_title)) ? $smd_tag_name : $smd_tag_title;
-        $smd_tag_name = (empty($smd_tag_name)) ? sanitizeForUrl($smd_tag_title) : sanitizeForUrl($smd_tag_name);
+        $smd_tag_name = (empty($smd_tag_name)) ? $smd_tag_title : $smd_tag_name;
         $existing_id = safe_field('id', SMD_TAG, "name = '$smd_tag_name' and type = '$smd_tag_type'");
 
         if ($existing_id and $existing_id != $smd_tag_id) {
@@ -2231,10 +2231,10 @@ function smd_tag_getsert($tag_name, $tag_type, $tag_title = '', $tag_parent = ''
     $clink = $ctrls['smd_tag_p_linkcat']['val'];
     $tag_title = ($tag_title == '') ? $tag_name : $tag_title;
     $tag_title = doSlash($tag_title);
-    $tag_name = doSlash(sanitizeForUrl($tag_name));
+    $tag_name = doSlash($tag_name);
     $tag_type = doSlash($tag_type);
     $tag_desc = doSlash($tag_desc);
-    $tag_parent = ($tag_parent) ? doSlash(sanitizeForUrl($tag_parent)) : 'root';
+    $tag_parent = ($tag_parent) ? doSlash($tag_parent) : 'root';
     $tag_cat = doSlash($tag_cat);
 
     $ret = safe_field('id', SMD_TAG, "name = '$tag_name' AND type = '$tag_type'");
@@ -3252,6 +3252,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
 
             // As long as this is a regular permlink scheme, set the tag to be the remaining URL portion
             if (!$sit) {
+                $section_uri = $subpath . join('/', array_slice($parts, 0, $pos)). '/';
                 if (in_array($parts[$pos], $validTypes)) {
                     $smd_tag_type = $parts[$pos];
                     $pos++;
@@ -3259,10 +3260,10 @@ function smd_tags_url_handler($evt = null, $stp = null)
                     $smd_tag_type = $validTypes[0];
                 }
 
-                $smd_tag = join('/', array_slice($parts, $pos));
+                $smd_tag = rawurldecode(join('/', array_slice($parts, $pos)));
                 smd_tags_set($smd_tag_type, $smd_tag);
                 $_SERVER['QUERY_STRING'] = $qatts;
-                $_SERVER['REQUEST_URI'] = $subpath . $parts[0]. '/'; // Drop back to section list mode
+                $_SERVER['REQUEST_URI'] = $section_uri; // Drop back to section list mode
 //              $_SERVER['QUERY_STRING'] = $urlnam.'='.$smd_tag .a. $urltyp.'='.$smd_tag_type . $qatts;
 //              $_SERVER['REQUEST_URI'] = $subpath . $parts[0] . '/?' . serverSet('QUERY_STRING');
             }
@@ -3270,7 +3271,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
     } elseif ((count($parts) == 1) && (in_array($parts[0], $urlsec) || in_array(gps('s'), $urlsec))) {
         // Default or named section (or /title permlink mode) + possible messy tag syntax
         $theType = gps($urltyp);
-        $smd_tag = gps($urlnam);
+        $smd_tag = rawurldecode(gps($urlnam));
         $smd_tag_type = (empty($theType) && empty($smd_tag)) ? '' : ((in_array($theType, $validTypes)) ? $theType : $validTypes[0]);
         smd_tags_set($smd_tag_type, $smd_tag);
         $_SERVER['QUERY_STRING'] = (($permlink_mode == 'messy') ? $urlnam.'='.$smd_tag .a. $urltyp.'='.$smd_tag_type : '') . $qatts;
@@ -4673,6 +4674,7 @@ function smd_tag_list($atts = array(), $thing = null)
             for ($idx = 0; $idx < count($sortOrder); $idx++) {
                 $sortargs[] = '$col_'.$sortOrder[$idx]['col'];
                 $sortargs[] = $sortOrder[$idx]['sort'];
+                $sortargs[] = 'SORT_LOCALE_STRING';
             }
 
             $sortit = 'array_multisort('.join(", ",$sortargs).', $rs);';
