@@ -3252,6 +3252,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
 
             // As long as this is a regular permlink scheme, set the tag to be the remaining URL portion
             if (!$sit) {
+                $section_uri = $subpath . join('/', array_slice($parts, 0, $pos)). '/';
                 if (in_array($parts[$pos], $validTypes)) {
                     $smd_tag_type = $parts[$pos];
                     $pos++;
@@ -3262,7 +3263,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
                 $smd_tag = rawurldecode(join('/', array_slice($parts, $pos)));
                 smd_tags_set($smd_tag_type, $smd_tag);
                 $_SERVER['QUERY_STRING'] = $qatts;
-                $_SERVER['REQUEST_URI'] = $subpath . $parts[0]. '/'; // Drop back to section list mode
+                $_SERVER['REQUEST_URI'] = $section_uri; // Drop back to section list mode
 //              $_SERVER['QUERY_STRING'] = $urlnam.'='.$smd_tag .a. $urltyp.'='.$smd_tag_type . $qatts;
 //              $_SERVER['REQUEST_URI'] = $subpath . $parts[0] . '/?' . serverSet('QUERY_STRING');
             }
