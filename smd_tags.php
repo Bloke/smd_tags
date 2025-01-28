@@ -3259,7 +3259,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
                     $smd_tag_type = $validTypes[0];
                 }
 
-                $smd_tag = join('/', array_slice($parts, $pos));
+                $smd_tag = rawurldecode(join('/', array_slice($parts, $pos)));
                 smd_tags_set($smd_tag_type, $smd_tag);
                 $_SERVER['QUERY_STRING'] = $qatts;
                 $_SERVER['REQUEST_URI'] = $subpath . $parts[0]. '/'; // Drop back to section list mode
@@ -3270,7 +3270,7 @@ function smd_tags_url_handler($evt = null, $stp = null)
     } elseif ((count($parts) == 1) && (in_array($parts[0], $urlsec) || in_array(gps('s'), $urlsec))) {
         // Default or named section (or /title permlink mode) + possible messy tag syntax
         $theType = gps($urltyp);
-        $smd_tag = gps($urlnam);
+        $smd_tag = rawurldecode(gps($urlnam));
         $smd_tag_type = (empty($theType) && empty($smd_tag)) ? '' : ((in_array($theType, $validTypes)) ? $theType : $validTypes[0]);
         smd_tags_set($smd_tag_type, $smd_tag);
         $_SERVER['QUERY_STRING'] = (($permlink_mode == 'messy') ? $urlnam.'='.$smd_tag .a. $urltyp.'='.$smd_tag_type : '') . $qatts;
