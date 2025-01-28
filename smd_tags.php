@@ -4674,6 +4674,7 @@ function smd_tag_list($atts = array(), $thing = null)
             for ($idx = 0; $idx < count($sortOrder); $idx++) {
                 $sortargs[] = '$col_'.$sortOrder[$idx]['col'];
                 $sortargs[] = $sortOrder[$idx]['sort'];
+                $sortargs[] = 'SORT_LOCALE_STRING';
             }
 
             $sortit = 'array_multisort('.join(", ",$sortargs).', $rs);';
