@@ -759,7 +759,7 @@ function smd_tags_savelist($evt, $stp)
                         if ($iptyp == 3 && !$exists) {
                             $tagBits = explode('-->', $tag);
                             if (count($tagBits) == 2) {
-                                $tagparent = strtolower($tagBits[0]);
+                                $tagparent = doSlash($tagBits[0]);
                                 $tagparent = safe_field('name', SMD_TAG, "name = '$tagparent' AND type = '$evt'"); // Check parent exists for this type
                                 $tagparent = ($tagparent === false) ? 'root' : $tagparent;
                                 $tagchild = $tagBits[1];
@@ -768,7 +768,7 @@ function smd_tags_savelist($evt, $stp)
                                 $tagchild = $tagBits[0];
                             }
 
-                            $sanitag = strtolower($tagchild);
+                            $sanitag = doSlash($tagchild);
                             $already = safe_field('id', SMD_TAG, "name = '$sanitag' AND type = '$evt'"); // Check again because parent-->child will fail 1st check
 
                             if ($already === false) {
@@ -4555,6 +4555,7 @@ function smd_tag_list($atts = array(), $thing = null)
     if (strtolower($parent) == 'smd_auto') {
         $parent = '';
         $plist = (isset($smd_tags[$type])) ? $smd_tags[$type]['tag_name'] : '';
+
         if (is_array($plist)) {
             foreach ($plist as $idx => $pname) {
                 $parent = $pname;

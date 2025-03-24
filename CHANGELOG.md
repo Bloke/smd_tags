@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.8.1 - 2025-01-26
+## 0.9.0 - 2025-01-26
 
 * Don't `doSlash()` fields for display. Prevents backslashes appearing in input boxes.
 * Select tooltips by ID to allow for numeric tag names to be interpreted correctly.
