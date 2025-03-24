@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.9.0 - 2025-01-26
+## 0.9.0 - 2025-03-24
 
 * Don't `doSlash()` fields for display. Prevents backslashes appearing in input boxes.
+* Fix tag i18n - no strtowlower/sanitizeForUrl (thanks, dshovchko).
 * Select tooltips by ID to allow for numeric tag names to be interpreted correctly.
 * Show tag list on image/thumb/file replace too.
 * Correct a few untranslated strings.
